@@ -12,7 +12,7 @@ typedef enum {
 typedef struct {
   int id;
   int arrival_time;
-  int finish;
+  int finish_time;
   ProcessState state;
 
   int *cpu_bursts;
