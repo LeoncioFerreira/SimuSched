@@ -14,10 +14,10 @@ typedef struct Priority_Queue {
 
 
 int has_preference(Process* p1, Process* p2) {
-    if (p1->priority > p2->priority) {
+    if (p1->priority < p2->priority) {
         return 1;
     }
-    if (p1->priority < p2->priority) {
+    if (p1->priority > p2->priority) {
         return 0;
     }
     if (p1->ready_queue_arrival_time < p2->ready_queue_arrival_time) {
