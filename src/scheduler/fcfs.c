@@ -2,64 +2,44 @@
 #include "scheduler.h"
 #include "process.h"
 #include "fcfs.h"
+#include "circular_queue.h"
 
-typedef struct FCFS_Node {
-    Process *p;
-    struct FCFS_Node* next;
-} FCFS_Node;
-
-typedef struct FCFS_Queue {
-    FCFS_Node* head;
-    FCFS_Node* tail;
-} FCFS_Queue;
-
-void fcfs_enqueue_process(struct Scheduler* self, Process* p) {
-    FCFS_Queue* queue = (FCFS_Queue*) self->state;
-
-    FCFS_Node* new_node = (FCFS_Node*) malloc(sizeof(FCFS_Node));
-    new_node->p = p;
-    new_node->next = NULL;
-
-    if (queue->head == NULL) {
-        queue->head = new_node;
-        queue->tail = new_node;
-    } else {
-        queue->tail->next = new_node;
-        queue->tail = new_node;
-    }
+static bool fcfs_enqueue_process(struct Scheduler* self, Process* p) {
+    CircularQueue* queue = (CircularQueue*) self->state;
+    return circular_queue_enqueue(queue, p);
 }
 
-Process* fcfs_get_next_process(struct Scheduler* self) {
-    FCFS_Queue* queue = (FCFS_Queue*) self->state;
+static Process* fcfs_get_next_process(struct Scheduler* self) {
+    CircularQueue* queue = (CircularQueue*) self->state;
+    return circular_queue_dequeue(queue);
+}
 
-    if (queue->head == NULL) {
-        return NULL;
-    }
+static bool fcfs_is_empty(struct Scheduler* self) {
+    CircularQueue* queue = (CircularQueue*) self->state;
+    return circular_queue_is_empty(queue);
+}
 
-    FCFS_Node* first_node = queue->head;
-    Process* next_process = first_node->p;
-
-    queue->head = queue->head->next;
-
-    if (queue->head == NULL) {
-        queue->tail = NULL;
-    }
-
-    free(first_node);
-
-    return next_process;
+static void fcfs_destroy(struct Scheduler* self) {
+    CircularQueue* queue = (CircularQueue*) self->state;
+    circular_queue_destroy(queue);
+    free(self);
 }
 
 Scheduler* create_fcfs_scheduler() {
     Scheduler* sched = (Scheduler*) malloc(sizeof(Scheduler));
+    if (!sched) return NULL;
 
-    FCFS_Queue* queue = (FCFS_Queue*) malloc(sizeof(FCFS_Queue));
-    queue->head = NULL;
-    queue->tail = NULL;
+    CircularQueue* queue = circular_queue_create(1000);
+    if (!queue) {
+        free(sched);
+        return NULL;
+    }
 
     sched->state = queue;
     sched->enqueue_process = fcfs_enqueue_process;
     sched->get_next_process = fcfs_get_next_process;
+    sched->is_empty = fcfs_is_empty;
+    sched->destroy = fcfs_destroy;
 
     return sched;
 }

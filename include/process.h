@@ -1,14 +1,27 @@
-#include <stdio.h>
+#ifndef PROCESS_H
+#define PROCESS_H
 
-#include <string.h>
+typedef enum {
+  STATE_NEW,
+  STATE_READY,
+  STATE_RUNNING,
+  STATE_BLOCKED,
+  STATE_FINISHED,
+} ProcessState;
 
+typedef struct {
+  int id;
+  int priority;
+  long ready_queue_arrival_time;
+  int arrival_time;
+  int finish_time;
+  ProcessState state;
 
-typedef struct Process{
-    int id;
-    int priority;
-    long ready_queue_arrival_time; // Instante em que o processo entrou na fila de prontos (para desempate e lógicado FCFS).
-    int cpu_burst; // (ou a quantidade de "tiques" de clock) que o processo precisa para executar sua tarefa na CPU
-
+  int *cpu_bursts;
+  int *io_bursts;
+  int num_bursts;
+  int current_burst_index;
+  int remaining_burst_time;
 } Process;
 
-
+#endif

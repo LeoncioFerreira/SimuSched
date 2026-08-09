@@ -11,12 +11,11 @@ void setUp(void) {
 }
 
 void tearDown(void) {
-    free(sched->state);
-    free(sched);
+    scheduler_destroy(sched);
 }
 
 void test_empty_queue(void) {
-    Process* p = sched->get_next_process(sched);
+    Process* p = scheduler_get_next_process(sched);
     TEST_ASSERT_NULL(p);
 }
 
@@ -26,14 +25,14 @@ void test_fcfs_order(void) {
     Process p2; p2.id = 2;
     Process p3; p3.id = 3;
 
-    sched->enqueue_process(sched, &p1);
-    sched->enqueue_process(sched, &p2);
-    sched->enqueue_process(sched, &p3);
+    scheduler_enqueue_process(sched, &p1);
+    scheduler_enqueue_process(sched, &p2);
+    scheduler_enqueue_process(sched, &p3);
 
-    TEST_ASSERT_EQUAL_INT(1, sched->get_next_process(sched)->id);
-    TEST_ASSERT_EQUAL_INT(2, sched->get_next_process(sched)->id);
-    TEST_ASSERT_EQUAL_INT(3, sched->get_next_process(sched)->id);
-    TEST_ASSERT_NULL(sched->get_next_process(sched));
+    TEST_ASSERT_EQUAL_INT(1, scheduler_get_next_process(sched)->id);
+    TEST_ASSERT_EQUAL_INT(2, scheduler_get_next_process(sched)->id);
+    TEST_ASSERT_EQUAL_INT(3, scheduler_get_next_process(sched)->id);
+    TEST_ASSERT_NULL(scheduler_get_next_process(sched));
 }
 
 int main(void) {
