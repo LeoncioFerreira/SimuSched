@@ -24,10 +24,10 @@ typedef struct {
   Process **incoming_processes;
 } SimulationCore;
 
-void core_init(SimulationCore *core, Process **processes, int total_processes, Scheduler *scheduler);
+void core_init(SimulationCore *core, Process **processes, int total_processes,
+               Scheduler *scheduler);
 void core_tick(SimulationCore *core);
 bool core_is_finished(SimulationCore *core);
 void core_destroy(SimulationCore *core);
 
 #endif
-

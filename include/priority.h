@@ -3,6 +3,6 @@
 
 #include "scheduler.h"
 
-Scheduler* create_priority_scheduler();
+Scheduler *create_priority_scheduler();
 
 #endif
