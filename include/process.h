@@ -11,6 +11,8 @@ typedef enum {
 
 typedef struct {
   int id;
+  int priority;
+  long ready_queue_arrival_time;
   int arrival_time;
   int finish_time;
   ProcessState state;

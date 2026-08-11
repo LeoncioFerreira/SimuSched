@@ -5,17 +5,19 @@
  * finalizado). Autor: Leôncio Ferreira
  */
 #include "simulation_core.h"
+#include "scheduler.h"
+#include <stdio.h>
 #include <stdlib.h>
 
-void core_init(SimulationCore *core, Process **processes, int total_processes) {
+void core_init(SimulationCore *core, Process **processes, int total_processes,
+               Scheduler *scheduler) {
   core->current_time = 0;
   core->completed_processes = 0;
   core->total_processes = total_processes;
   core->running_process = NULL;
   core->incoming_processes = processes;
 
-  // Cria as filas com capacidade máxima
-  core->ready_queue = circular_queue_create(total_processes);
+  core->scheduler = scheduler;
   core->blocked_queue = circular_queue_create(total_processes);
 }
 
@@ -25,6 +27,7 @@ bool core_is_finished(SimulationCore *core) {
 
 void core_tick(SimulationCore *core) {
   int i;
+  int initial_blocked_count = core->blocked_queue->size;
 
   // novo -> pronto
   for (i = 0; i < core->total_processes; i++) {
@@ -33,33 +36,18 @@ void core_tick(SimulationCore *core) {
       p->state = STATE_READY;
       p->current_burst_index = 0;
       p->remaining_burst_time = p->cpu_bursts[0]; // Inicializa o burst
-      circular_queue_enqueue(core->ready_queue, p);
-    }
-  }
-
-  // bloqueado -> pronto
-  int blocked_count = core->blocked_queue->size;
-  for (i = 0; i < blocked_count; i++) {
-    Process *p = circular_queue_dequeue(core->blocked_queue);
-    p->remaining_burst_time--;
-
-    // Se o tempo de i/o acaba o processo volta a fila de prontos
-    if (p->remaining_burst_time <= 0) {
-      p->state = STATE_READY;
-      p->current_burst_index++;
-
-      p->remaining_burst_time = p->cpu_bursts[p->current_burst_index];
-      circular_queue_enqueue(core->ready_queue, p);
-    } else {
-      // Ainda bloqueado, devolve para a fila de bloqueados
-      circular_queue_enqueue(core->blocked_queue, p);
+      p->ready_queue_arrival_time = core->current_time;
+      if (!scheduler_enqueue_process(core->scheduler, p)) {
+        fprintf(stderr, "Erro ao inserir processo %d na fila de prontos\n",
+                p->id);
+        exit(EXIT_FAILURE);
+      }
     }
   }
 
   // Em execução
-  if (core->running_process == NULL &&
-      !circular_queue_is_empty(core->ready_queue)) {
-    core->running_process = circular_queue_dequeue(core->ready_queue);
+  if (core->running_process == NULL && !scheduler_is_empty(core->scheduler)) {
+    core->running_process = scheduler_get_next_process(core->scheduler);
     core->running_process->state = STATE_RUNNING;
   }
 
@@ -73,8 +61,7 @@ void core_tick(SimulationCore *core) {
       if (rp->current_burst_index >= rp->num_bursts - 1) {
         // Pronto -> Finalizado
         rp->state = STATE_FINISHED;
-        rp->finish_time = core->current_time;
-
+        rp->finish_time = core->current_time + 1;
         core->completed_processes++;
       } else {
         rp->state = STATE_BLOCKED;
@@ -84,12 +71,35 @@ void core_tick(SimulationCore *core) {
       core->running_process = NULL;
     }
   }
+
+  // bloqueado -> pronto
+  for (i = 0; i < initial_blocked_count; i++) {
+    Process *p = circular_queue_dequeue(core->blocked_queue);
+    p->remaining_burst_time--;
+
+    // Se o tempo de i/o acaba o processo volta a fila de prontos
+    if (p->remaining_burst_time <= 0) {
+      p->state = STATE_READY;
+      p->current_burst_index++;
+
+      p->remaining_burst_time = p->cpu_bursts[p->current_burst_index];
+      p->ready_queue_arrival_time = core->current_time + 1;
+      if (!scheduler_enqueue_process(core->scheduler, p)) {
+        fprintf(stderr, "Erro ao inserir processo %d na fila de prontos\n",
+                p->id);
+        exit(EXIT_FAILURE);
+      }
+    } else {
+      // Ainda bloqueado, devolve para a fila de bloqueados
+      circular_queue_enqueue(core->blocked_queue, p);
+    }
+  }
   core->current_time++;
 }
 
 void core_destroy(SimulationCore *core) {
-  if (core->ready_queue != NULL) {
-    circular_queue_destroy(core->ready_queue);
+  if (core->scheduler != NULL) {
+    scheduler_destroy(core->scheduler);
   }
   if (core->blocked_queue != NULL) {
     circular_queue_destroy(core->blocked_queue);
