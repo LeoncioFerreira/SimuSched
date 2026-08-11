@@ -1,58 +1,107 @@
 #include "workload.h"
+#include <stdbool.h>
+#include <stdint.h>
 #include <stdlib.h>
 
-// Gerador de números pseudoaleatórios isolado (LCG)
 static unsigned int lcg_rand(unsigned int *seed_state) {
-  *seed_state = (*seed_state * 1103515245 + 12345) % ((unsigned int)1 << 31);
+  *seed_state = *seed_state * 1664525U + 1013904223U;
   return *seed_state;
 }
 
-// Gera intervalo [min, max] usando a seed passada
 static int rand_range(unsigned int *seed_state, int min, int max) {
-  if (min == max)
-    return min;
-  return min + (lcg_rand(seed_state) % (max - min + 1));
+  uint64_t span = (uint64_t)((int64_t)max - (int64_t)min + 1);
+  return min + (int)(lcg_rand(seed_state) % span);
 }
 
-Process *generate_workload(ScenarioConfig config, unsigned int seed) {
-  Process *workload =
-      (Process *)malloc(config.total_processes * sizeof(Process));
-  if (!workload)
+static bool config_is_valid(const ScenarioConfig *config) {
+  return config != NULL && config->total_processes > 0 &&
+         config->min_arrival >= 0 &&
+         config->min_arrival <= config->max_arrival &&
+         config->min_priority >= 0 &&
+         config->min_priority <= config->max_priority &&
+         config->min_burst_duration > 0 &&
+         config->min_burst_duration <= config->max_burst_duration &&
+         config->min_cpu_bursts > 0 &&
+         config->min_cpu_bursts <= config->max_cpu_bursts;
+}
+
+void free_workload(Process **workload, int total_processes) {
+  if (workload == NULL)
+    return;
+
+  for (int i = 0; i < total_processes; i++) {
+    if (workload[i] == NULL)
+      continue;
+    free(workload[i]->cpu_bursts);
+    free(workload[i]->io_bursts);
+    free(workload[i]);
+  }
+  free(workload);
+}
+
+Process **generate_workload(const ScenarioConfig *config, unsigned int seed) {
+  if (!config_is_valid(config))
+    return NULL;
+
+  Process **workload =
+      (Process **)calloc((size_t)config->total_processes, sizeof(Process *));
+  if (workload == NULL)
     return NULL;
 
   unsigned int current_seed = seed;
 
-  for (int i = 0; i < config.total_processes; i++) {
-    workload[i].id = i;
-    workload[i].arrival_time =
-        rand_range(&current_seed, config.min_arrival, config.max_arrival);
-    workload[i].priority =
-        rand_range(&current_seed, config.min_priority, config.max_priority);
-    workload[i].state = STATE_NEW;
+  for (int i = 0; i < config->total_processes; i++) {
+    Process *process = (Process *)calloc(1, sizeof(Process));
+    if (process == NULL) {
+      free_workload(workload, config->total_processes);
+      return NULL;
+    }
+    workload[i] = process;
 
-    // Sorteia rajadas de CPU. Rajadas de IO serão N-1. Total = 2*N - 1.
-    int num_cpu_bursts =
-        rand_range(&current_seed, config.min_cpu_bursts, config.max_cpu_bursts);
-    workload[i].num_bursts = num_cpu_bursts * 2 - 1;
-    workload[i].bursts =
-        (Burst *)malloc(workload[i].num_bursts * sizeof(Burst));
+    process->id = i;
+    process->arrival_time =
+        rand_range(&current_seed, config->min_arrival, config->max_arrival);
+    process->priority =
+        rand_range(&current_seed, config->min_priority, config->max_priority);
+    process->state = STATE_NEW;
+    process->num_bursts = rand_range(&current_seed, config->min_cpu_bursts,
+                                     config->max_cpu_bursts);
 
-    // Montagem: CPU nos pares (0, 2, 4...), IO nos ímpares (1, 3, 5...)
-    for (int j = 0; j < workload[i].num_bursts; j++) {
-      workload[i].bursts[j].type = (j % 2 == 0) ? BURST_CPU : BURST_IO;
-      workload[i].bursts[j].duration = rand_range(
-          &current_seed, config.min_burst_duration, config.max_burst_duration);
+    if ((size_t)process->num_bursts > SIZE_MAX / sizeof(int)) {
+      free_workload(workload, config->total_processes);
+      return NULL;
+    }
+    process->cpu_bursts =
+        (int *)malloc((size_t)process->num_bursts * sizeof(int));
+    if (process->cpu_bursts == NULL) {
+      free_workload(workload, config->total_processes);
+      return NULL;
+    }
+
+    if (process->num_bursts > 1) {
+      if ((size_t)(process->num_bursts - 1) > SIZE_MAX / sizeof(int)) {
+        free_workload(workload, config->total_processes);
+        return NULL;
+      }
+      process->io_bursts =
+          (int *)malloc((size_t)(process->num_bursts - 1) * sizeof(int));
+      if (process->io_bursts == NULL) {
+        free_workload(workload, config->total_processes);
+        return NULL;
+      }
+    }
+
+    for (int j = 0; j < process->num_bursts; j++) {
+      process->cpu_bursts[j] =
+          rand_range(&current_seed, config->min_burst_duration,
+                     config->max_burst_duration);
+      if (j < process->num_bursts - 1) {
+        process->io_bursts[j] =
+            rand_range(&current_seed, config->min_burst_duration,
+                       config->max_burst_duration);
+      }
     }
   }
 
   return workload;
-}
-
-void free_workload(Process *workload, int total_processes) {
-  if (!workload)
-    return;
-  for (int i = 0; i < total_processes; i++) {
-    free(workload[i].bursts);
-  }
-  free(workload);
 }
