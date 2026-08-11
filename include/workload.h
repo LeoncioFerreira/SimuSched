@@ -1,0 +1,21 @@
+#ifndef WORKLOAD_H
+#define WORKLOAD_H
+
+#include "process.h"
+
+typedef struct {
+  int total_processes;
+  int min_arrival;
+  int max_arrival;
+  int min_priority;
+  int max_priority;
+  int min_burst_duration;
+  int max_burst_duration;
+  int min_cpu_bursts;
+  int max_cpu_bursts;
+} ScenarioConfig;
+
+Process **generate_workload(const ScenarioConfig *config, unsigned int seed);
+void free_workload(Process **workload, int total_processes);
+
+#endif
