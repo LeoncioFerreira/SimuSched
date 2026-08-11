@@ -134,9 +134,9 @@ void test_priority_integration(void) {
   TEST_ASSERT_EQUAL(STATE_BLOCKED, local_procs[0]->state);
   TEST_ASSERT_EQUAL(STATE_READY, local_procs[1]->state);
 
-  core_tick(&local_core); // Tick 2: p2 runs
+  core_tick(&local_core); // Tick 2: p2 runs and finishes (CPU burst of 1)
   TEST_ASSERT_EQUAL(STATE_BLOCKED, local_procs[0]->state);
-  TEST_ASSERT_EQUAL(STATE_RUNNING, local_procs[1]->state);
+  TEST_ASSERT_EQUAL(STATE_FINISHED, local_procs[1]->state);
 
   core_destroy(&local_core);
   free(local_procs[0]);
