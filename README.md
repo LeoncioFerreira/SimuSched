@@ -6,7 +6,7 @@
 
 SimuSched será um simulador de escalonamento de processos para a disciplina de Sistemas Operacionais. O projeto comparará algoritmos clássicos com um algoritmo proposto pela equipe, usando cargas de trabalho determinísticas geradas por seed e métricas quantitativas de desempenho e justiça.
 
-> Status atual: repositório organizado. A implementação do simulador ainda não foi iniciada.
+> Status atual: núcleo de simulação, escalonadores FCFS e prioridade não preemptiva, gerador determinístico e interface de linha de comando implementados.
 
 ## 📄 Objetivo acadêmico
 
@@ -83,7 +83,7 @@ As responsabilidades serão registradas e atualizadas antes da entrega, junto do
 
 ## 🚀 Fluxo previsto de execução
 
-Quando a implementação estiver disponível, o fluxo reproduzível será:
+O fluxo reproduzível adotado pelo projeto é:
 
 1. Definir um cenário e suas seeds em `configs/`.
 2. Compilar o simulador C.
@@ -92,13 +92,13 @@ Quando a implementação estiver disponível, o fluxo reproduzível será:
 5. Consolidar médias e intervalos de confiança em `data/processed/`.
 6. Gerar gráficos em `results/figures/` para o artigo e os slides.
 
-Os comandos exatos de compilação, testes e experimentos serão acrescentados junto com a implementação, por meio de um `Makefile` e scripts documentados.
+Os comandos atuais de compilação, testes e execução estão documentados abaixo. As etapas de consolidação estatística e geração de gráficos serão adicionadas com os módulos correspondentes.
 
 ## 🧪 Qualidade e reprodutibilidade
 
-A futura suíte de testes verificará, no mínimo, a geração idêntica de cargas para a mesma seed, as transições de estado dos processos, as regras de cada escalonador e o cálculo das métricas.
+A suíte de testes verifica a geração idêntica de cargas para a mesma seed, as transições de estado dos processos, as regras de cada escalonador, a CLI, os cenários e a exportação CSV. Os testes de métricas serão adicionados junto desse módulo.
 
-O projeto usa o framework [Unity](https://github.com/ThrowTheSwitch/Unity), versionado em `tests/vendor/`, como no repositório de referência. O teste de sanidade atual pode ser executado com:
+O projeto usa o framework [Unity](https://github.com/ThrowTheSwitch/Unity), versionado em `tests/vendor/`. Toda a suíte pode ser executada com:
 
 ```bash
 make test
@@ -106,11 +106,45 @@ make test
 
 Os alvos disponíveis por enquanto são `make all`, `make test`, `make lint`, `make format` e `make clean`.
 
+### Compilação e execução
+
+Compile o simulador e execute toda a suíte de testes com:
+
+```bash
+make all
+make test
+```
+
+O binário aceita algoritmo, seed, arquivo de cenário e arquivo CSV de saída:
+
+```text
+./bin/simulador --algorithm <fcfs|priority> --seed <n> --config <arquivo> --output <csv>
+```
+
+Exemplos usando a mesma carga para os dois algoritmos:
+
+```bash
+./bin/simulador --algorithm fcfs --seed 42 --config configs/small.conf --output data/raw/fcfs-small-42.csv
+./bin/simulador --algorithm priority --seed 42 --config configs/small.conf --output data/raw/priority-small-42.csv
+```
+
+Os arquivos em `configs/` usam o formato `chave=valor`. O cenário inicial
+[`configs/small.conf`](configs/small.conf) demonstra todos os campos obrigatórios:
+
+- `scenario`;
+- `total_processes`;
+- `min_arrival` e `max_arrival`;
+- `min_priority` e `max_priority`;
+- `min_burst_duration` e `max_burst_duration`;
+- `min_cpu_bursts` e `max_cpu_bursts`.
+
+O intervalo de duração é usado tanto nas rajadas de CPU quanto nas rajadas de E/S. O CSV gerado contém as colunas `algorithm`, `seed`, `scenario`, `total_processes` e `total_simulated_time`.
+
 ## ⚙️ Pipeline de Integração Contínua (CI)
 
 O GitHub Actions em [`.github/workflows/ci.yml`](.github/workflows/ci.yml) executa em pushes e pull requests para `main` e `develop`.
 
-Enquanto o simulador ainda não possui fontes C, o pipeline valida a estrutura obrigatória do repositório e a documentação de issues. Quando fontes C forem adicionados, ele também instalará `cppcheck` e `clang-format`, verificará formatação, executará o linter e rodará `make all` e `make test`. Assim, a entrega passa a exigir build e testes automatizados sem permitir que uma implementação parcial silencie essas verificações.
+O pipeline valida a estrutura obrigatória, instala `cppcheck` e `clang-format`, verifica a formatação, executa o linter e roda `make all` e `make test`. Assim, toda alteração precisa manter build e testes automatizados aprovados.
 
 ## 📅 Entrega
 
