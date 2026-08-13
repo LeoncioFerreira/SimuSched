@@ -28,7 +28,7 @@ void test_generated_workload_runs_in_simulation_core(void) {
   TEST_ASSERT_NOT_NULL(scheduler);
 
   SimulationCore core;
-  core_init(&core, processes, config.total_processes, scheduler);
+  core_init(&core, processes, config.total_processes, scheduler, 0);
 
   int ticks = 0;
   while (!core_is_finished(&core) && ticks < 20) {
