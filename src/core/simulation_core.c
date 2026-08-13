@@ -9,19 +9,29 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void core_init(SimulationCore *core, Process **processes, int total_processes,
-               Scheduler *scheduler, int quantum) {
+bool core_init(SimulationCore *core, Process **processes, int total_processes,
+               Scheduler *scheduler, int quantum, int context_switch_cost) {
+  if (quantum < 0 || context_switch_cost < 0) {
+    return false;
+  }
   core->current_time = 0;
   core->completed_processes = 0;
   core->total_processes = total_processes;
   core->running_process = NULL;
+  core->last_running_process = NULL;
   core->incoming_processes = processes;
+
+  core->context_switch_cost = context_switch_cost;
+  core->current_switch_remaining = 0;
+  core->total_context_switches = 0;
 
   core->scheduler = scheduler;
   core->blocked_queue = circular_queue_create(total_processes);
 
   core->quantum = quantum;
   core->quantum_used = 0;
+
+  return true;
 }
 
 bool core_is_finished(SimulationCore *core) {
@@ -51,11 +61,26 @@ void core_tick(SimulationCore *core) {
   // Em execução
   if (core->running_process == NULL && !scheduler_is_empty(core->scheduler)) {
     core->running_process = scheduler_get_next_process(core->scheduler);
-    core->running_process->state = STATE_RUNNING;
-    core->quantum_used = 0;
+    if (core->running_process != NULL) {
+      core->running_process->state = STATE_RUNNING;
+      core->quantum_used = 0;
+    }
   }
 
-  if (core->running_process != NULL) {
+  // 3. Lógica de Troca de Contexto
+  if (core->running_process != core->last_running_process) {
+    // Troca entre processos distintos (saída do ocioso não conta)
+    if (core->last_running_process != NULL && core->running_process != NULL) {
+      core->current_switch_remaining = core->context_switch_cost;
+      core->total_context_switches++;
+    }
+    core->last_running_process = core->running_process;
+  }
+
+  // 4. Progresso da CPU ou Indisponibilidade por Troca
+  if (core->current_switch_remaining > 0) {
+    core->current_switch_remaining--; // Ninguém executa CPU
+  } else if (core->running_process != NULL) {
     core->running_process->remaining_burst_time--;
     if (core->quantum > 0) {
       core->quantum_used++;
@@ -92,7 +117,7 @@ void core_tick(SimulationCore *core) {
     }
   }
 
-  // bloqueado -> pronto
+  // 5. bloqueado -> pronto (E/S Paralela original mantida)
   for (i = 0; i < initial_blocked_count; i++) {
     Process *p = circular_queue_dequeue(core->blocked_queue);
     p->remaining_burst_time--;
@@ -114,6 +139,7 @@ void core_tick(SimulationCore *core) {
       circular_queue_enqueue(core->blocked_queue, p);
     }
   }
+
   core->current_time++;
 }
 

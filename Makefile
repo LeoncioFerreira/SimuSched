@@ -55,7 +55,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
 
 # Regra para compilar e rodar todos os testes automaticamente
 test: $(TEST_BINS)
-	@for test in $(TEST_BINS); do \
+	@set -e; for test in $(TEST_BINS); do \
 		echo "Executando $$test..."; \
 		./$$test; \
 	done

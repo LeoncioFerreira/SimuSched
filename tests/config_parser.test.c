@@ -26,7 +26,8 @@ static const char *valid_config(void) {
          "max_burst_duration=8\n"
          "min_cpu_bursts=1\n"
          "max_cpu_bursts=3\n"
-         "quantum=2\n";
+         "quantum=2\n"
+         "context_switch_cost=1\n";
 }
 
 static void assert_config_fails(const char *content) {
@@ -58,6 +59,16 @@ void test_parses_valid_scenario(void) {
   TEST_ASSERT_EQUAL_INT(1, scenario.config.min_cpu_bursts);
   TEST_ASSERT_EQUAL_INT(3, scenario.config.max_cpu_bursts);
   TEST_ASSERT_EQUAL_INT(2, scenario.quantum);
+  TEST_ASSERT_EQUAL_INT(1, scenario.config.context_switch_cost);
+}
+
+void test_rejects_negative_context_switch_cost(void) {
+  char config[1024];
+  snprintf(config, sizeof(config), "%s", valid_config());
+  char *cost = strstr(config, "context_switch_cost=1");
+  TEST_ASSERT_NOT_NULL(cost);
+  strcpy(cost, "context_switch_cost=-1\n");
+  assert_config_fails(config);
 }
 
 void test_rejects_invalid_quantum(void) {
@@ -132,6 +143,7 @@ int main(void) {
   UNITY_BEGIN();
   RUN_TEST(test_parses_valid_scenario);
   RUN_TEST(test_rejects_invalid_quantum);
+  RUN_TEST(test_rejects_negative_context_switch_cost);
   RUN_TEST(test_rejects_missing_file);
   RUN_TEST(test_rejects_unknown_and_duplicate_keys);
   RUN_TEST(test_rejects_missing_and_malformed_keys);

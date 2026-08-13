@@ -34,7 +34,7 @@ void test_preempts_and_rotates_processes_after_quantum(void) {
   Process *processes[] = {&first, &second};
   SimulationCore core;
 
-  core_init(&core, processes, 2, create_round_robin_scheduler(2), 2);
+  core_init(&core, processes, 2, create_round_robin_scheduler(2), 2, 0);
   core_tick(&core);
   core_tick(&core);
 
@@ -52,7 +52,7 @@ void test_keeps_single_process_running_after_quantum(void) {
   Process *processes[] = {&process};
   SimulationCore core;
 
-  core_init(&core, processes, 1, create_round_robin_scheduler(1), 2);
+  core_init(&core, processes, 1, create_round_robin_scheduler(1), 2, 0);
   core_tick(&core);
   core_tick(&core);
 
@@ -71,7 +71,7 @@ void test_preempts_when_process_arrives_during_execution(void) {
   Process *processes[] = {&first, &second};
   SimulationCore core;
 
-  core_init(&core, processes, 2, create_round_robin_scheduler(2), 2);
+  core_init(&core, processes, 2, create_round_robin_scheduler(2), 2, 0);
   core_tick(&core);
   core_tick(&core);
 
@@ -95,7 +95,7 @@ void test_unblocked_process_returns_to_end_of_ready_queue(void) {
   Process *processes[] = {&first, &second, &third};
   SimulationCore core;
 
-  core_init(&core, processes, 3, create_round_robin_scheduler(3), 1);
+  core_init(&core, processes, 3, create_round_robin_scheduler(3), 1, 0);
   core_tick(&core);
   core_tick(&core);
 
@@ -112,11 +112,34 @@ void test_unblocked_process_returns_to_end_of_ready_queue(void) {
   core_destroy(&core);
 }
 
+void test_context_switch_cost_applies_after_round_robin_preemption(void) {
+  int first_cpu[] = {3};
+  int second_cpu[] = {3};
+  Process first = process_with_bursts(1, 0, first_cpu, NULL, 1);
+  Process second = process_with_bursts(2, 0, second_cpu, NULL, 1);
+  Process *processes[] = {&first, &second};
+  SimulationCore core;
+
+  TEST_ASSERT_TRUE(
+      core_init(&core, processes, 2, create_round_robin_scheduler(2), 1, 2));
+  core_tick(&core);
+  core_tick(&core);
+  TEST_ASSERT_EQUAL_INT(3, second.remaining_burst_time);
+  core_tick(&core);
+  TEST_ASSERT_EQUAL_INT(3, second.remaining_burst_time);
+  core_tick(&core);
+  TEST_ASSERT_EQUAL_INT(2, second.remaining_burst_time);
+  TEST_ASSERT_EQUAL_INT(1, core.total_context_switches);
+
+  core_destroy(&core);
+}
+
 int main(void) {
   UNITY_BEGIN();
   RUN_TEST(test_preempts_and_rotates_processes_after_quantum);
   RUN_TEST(test_keeps_single_process_running_after_quantum);
   RUN_TEST(test_preempts_when_process_arrives_during_execution);
   RUN_TEST(test_unblocked_process_returns_to_end_of_ready_queue);
+  RUN_TEST(test_context_switch_cost_applies_after_round_robin_preemption);
   return UNITY_END();
 }

@@ -18,7 +18,8 @@ enum {
   KEY_MIN_CPU_BURSTS = 1U << 8,
   KEY_MAX_CPU_BURSTS = 1U << 9,
   KEY_QUANTUM = 1U << 10,
-  ALL_KEYS = (1U << 11) - 1U,
+  KEY_CONTEXT_SWITCH_COST = 1U << 11,
+  ALL_KEYS = (1U << 12) - 1U,
 };
 
 static ConfigParseResult fail(char *error, size_t error_size,
@@ -61,7 +62,8 @@ static int config_is_valid(const ScenarioConfig *config) {
          config->min_burst_duration > 0 &&
          config->min_burst_duration <= config->max_burst_duration &&
          config->min_cpu_bursts > 0 &&
-         config->min_cpu_bursts <= config->max_cpu_bursts;
+         config->min_cpu_bursts <= config->max_cpu_bursts &&
+         config->context_switch_cost >= 0;
 }
 
 static unsigned int key_flag(const char *key, int **target,
@@ -109,6 +111,10 @@ static unsigned int key_flag(const char *key, int **target,
   if (strcmp(key, "quantum") == 0) {
     *target = &scenario->quantum;
     return KEY_QUANTUM;
+  }
+  if (strcmp(key, "context_switch_cost") == 0) {
+    *target = &config->context_switch_cost;
+    return KEY_CONTEXT_SWITCH_COST;
   }
   return 0;
 }

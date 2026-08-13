@@ -13,6 +13,7 @@ typedef struct {
   int max_burst_duration;
   int min_cpu_bursts;
   int max_cpu_bursts;
+  int context_switch_cost;
 } ScenarioConfig;
 
 Process **generate_workload(const ScenarioConfig *config, unsigned int seed);

@@ -10,6 +10,7 @@
 #include "./process.h"
 #include "circular_queue.h"
 #include "scheduler.h"
+#include <stdbool.h>
 
 typedef struct {
   int current_time;
@@ -17,6 +18,11 @@ typedef struct {
   int total_processes;
 
   Process *running_process;
+  Process *last_running_process;
+
+  int context_switch_cost;
+  int current_switch_remaining;
+  int total_context_switches;
 
   Scheduler *scheduler;
   CircularQueue *blocked_queue;
@@ -27,8 +33,8 @@ typedef struct {
   int quantum_used;
 } SimulationCore;
 
-void core_init(SimulationCore *core, Process **processes, int total_processes,
-               Scheduler *scheduler, int quantum);
+bool core_init(SimulationCore *core, Process **processes, int total_processes,
+               Scheduler *scheduler, int quantum, int context_switch_cost);
 void core_tick(SimulationCore *core);
 bool core_is_finished(SimulationCore *core);
 void core_destroy(SimulationCore *core);

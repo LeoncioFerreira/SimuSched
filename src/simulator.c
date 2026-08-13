@@ -27,8 +27,9 @@ static Scheduler *create_scheduler(const char *algorithm, int capacity) {
 }
 
 static bool calculate_tick_limit(Process **processes, int total_processes,
-                                 int *limit) {
+                                 int context_switch_cost, int *limit) {
   long long total = (long long)total_processes + 1;
+  long long total_cpu_time = 0;
 
   for (int i = 0; i < total_processes; i++) {
     Process *process = processes[i];
@@ -36,12 +37,17 @@ static bool calculate_tick_limit(Process **processes, int total_processes,
       total = process->arrival_time + (long long)total_processes + 1;
     for (int j = 0; j < process->num_bursts; j++) {
       total += process->cpu_bursts[j];
+      total_cpu_time += process->cpu_bursts[j];
       if (j < process->num_bursts - 1)
         total += process->io_bursts[j];
       if (total > INT_MAX)
         return false;
     }
   }
+  if (total_cpu_time > 0)
+    total += (total_cpu_time - 1) * context_switch_cost;
+  if (total > INT_MAX)
+    return false;
   *limit = (int)total;
   return true;
 }
@@ -70,7 +76,7 @@ bool run_simulator(const CliOptions *options, char *error, size_t error_size) {
     goto cleanup;
   }
   if (!calculate_tick_limit(workload, scenario.config.total_processes,
-                            &tick_limit)) {
+                            scenario.config.context_switch_cost, &tick_limit)) {
     fail(error, error_size, "carga excede o limite de tempo suportado");
     goto cleanup;
   }
@@ -84,8 +90,11 @@ bool run_simulator(const CliOptions *options, char *error, size_t error_size) {
 
   if (strcmp(options->algorithm, "round-robin") == 0)
     quantum = scenario.quantum;
-  core_init(&core, workload, scenario.config.total_processes, scheduler,
-            quantum);
+  if (!core_init(&core, workload, scenario.config.total_processes, scheduler,
+                 quantum, scenario.config.context_switch_cost)) {
+    fail(error, error_size, "parametros invalidos para o nucleo da simulacao");
+    goto cleanup;
+  }
   core_initialized = true;
   scheduler = NULL;
   if (core.blocked_queue == NULL || core.blocked_queue->data == NULL) {

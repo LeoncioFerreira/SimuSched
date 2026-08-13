@@ -39,7 +39,7 @@ void setUp(void) {
   processos[1]->remaining_burst_time = 0;
 
   Scheduler *sched = create_fcfs_scheduler(1000);
-  core_init(&core, processos, 2, sched, 0);
+  core_init(&core, processos, 2, sched, 0, 0);
 }
 
 void tearDown(void) {
@@ -124,7 +124,7 @@ void test_priority_integration(void) {
   local_procs[1]->priority = 5;
 
   Scheduler *prio_sched = create_priority_scheduler();
-  core_init(&local_core, local_procs, 2, prio_sched, 0);
+  core_init(&local_core, local_procs, 2, prio_sched, 0, 0);
 
   core_tick(&local_core); // Tick 0: p1 arrives and runs (burst 2)
   TEST_ASSERT_EQUAL(STATE_RUNNING, local_procs[0]->state);
