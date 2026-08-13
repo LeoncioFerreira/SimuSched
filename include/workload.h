@@ -9,10 +9,13 @@ typedef struct {
   int max_arrival;
   int min_priority;
   int max_priority;
-  int min_burst_duration;
-  int max_burst_duration;
+  double high_priority_ratio;
+  int min_cpu_burst_duration;
+  int max_cpu_burst_duration;
   int min_cpu_bursts;
   int max_cpu_bursts;
+  int min_io_burst_duration;
+  int max_io_burst_duration;
   int context_switch_cost;
 } ScenarioConfig;
 

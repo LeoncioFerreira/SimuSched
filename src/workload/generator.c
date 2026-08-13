@@ -19,8 +19,12 @@ static bool config_is_valid(const ScenarioConfig *config) {
          config->min_arrival <= config->max_arrival &&
          config->min_priority >= 0 &&
          config->min_priority <= config->max_priority &&
-         config->min_burst_duration > 0 &&
-         config->min_burst_duration <= config->max_burst_duration &&
+         config->high_priority_ratio >= 0.0 &&
+         config->high_priority_ratio <= 1.0 &&
+         config->min_cpu_burst_duration > 0 &&
+         config->min_cpu_burst_duration <= config->max_cpu_burst_duration &&
+         config->min_io_burst_duration >= 0 &&
+         config->min_io_burst_duration <= config->max_io_burst_duration &&
          config->min_cpu_bursts > 0 &&
          config->min_cpu_bursts <= config->max_cpu_bursts;
 }
@@ -61,8 +65,14 @@ Process **generate_workload(const ScenarioConfig *config, unsigned int seed) {
     process->id = i;
     process->arrival_time =
         rand_range(&current_seed, config->min_arrival, config->max_arrival);
-    process->priority =
-        rand_range(&current_seed, config->min_priority, config->max_priority);
+        
+    double prob = (double)(lcg_rand(&current_seed) % 1000) / 1000.0;
+    if (prob <= config->high_priority_ratio) {
+        process->priority = config->min_priority; 
+    } else {
+        process->priority = config->max_priority;
+    }
+        
     process->state = STATE_NEW;
     process->num_bursts = rand_range(&current_seed, config->min_cpu_bursts,
                                      config->max_cpu_bursts);
@@ -93,12 +103,12 @@ Process **generate_workload(const ScenarioConfig *config, unsigned int seed) {
 
     for (int j = 0; j < process->num_bursts; j++) {
       process->cpu_bursts[j] =
-          rand_range(&current_seed, config->min_burst_duration,
-                     config->max_burst_duration);
+          rand_range(&current_seed, config->min_cpu_burst_duration,
+                     config->max_cpu_burst_duration);
       if (j < process->num_bursts - 1) {
         process->io_bursts[j] =
-            rand_range(&current_seed, config->min_burst_duration,
-                       config->max_burst_duration);
+            rand_range(&current_seed, config->min_io_burst_duration,
+                       config->max_io_burst_duration);
       }
     }
   }
