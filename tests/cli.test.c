@@ -66,9 +66,20 @@ void test_rejects_invalid_seeds(void) {
 }
 
 void test_rejects_unknown_algorithm(void) {
+  char *argv[] = {"simulador", "--algorithm", "sjf",      "--seed", "42",
+                  "--config",  "small.conf",  "--output", "run.csv"};
+  assert_parse_fails(9, argv);
+}
+
+void test_accepts_round_robin_algorithm(void) {
+  CliOptions options;
+  char error[256];
   char *argv[] = {"simulador", "--algorithm", "round-robin", "--seed", "42",
                   "--config",  "small.conf",  "--output",    "run.csv"};
-  assert_parse_fails(9, argv);
+
+  TEST_ASSERT_EQUAL_INT(CLI_PARSE_OK,
+                        cli_parse(9, argv, &options, error, sizeof(error)));
+  TEST_ASSERT_EQUAL_STRING("round-robin", options.algorithm);
 }
 
 int main(void) {
@@ -79,5 +90,6 @@ int main(void) {
   RUN_TEST(test_rejects_duplicate_option);
   RUN_TEST(test_rejects_invalid_seeds);
   RUN_TEST(test_rejects_unknown_algorithm);
+  RUN_TEST(test_accepts_round_robin_algorithm);
   return UNITY_END();
 }

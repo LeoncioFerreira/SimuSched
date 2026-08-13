@@ -6,15 +6,18 @@
 
 static const char *fcfs_path = "tests/tmp_fcfs.csv";
 static const char *priority_path = "tests/tmp_priority.csv";
+static const char *round_robin_path = "tests/tmp_round_robin.csv";
 
 void setUp(void) {
   remove(fcfs_path);
   remove(priority_path);
+  remove(round_robin_path);
 }
 
 void tearDown(void) {
   remove(fcfs_path);
   remove(priority_path);
+  remove(round_robin_path);
 }
 
 static void assert_run_writes_csv(const char *algorithm, const char *path) {
@@ -44,6 +47,10 @@ void test_runs_small_scenario_with_priority(void) {
   assert_run_writes_csv("priority", priority_path);
 }
 
+void test_runs_small_scenario_with_round_robin(void) {
+  assert_run_writes_csv("round-robin", round_robin_path);
+}
+
 void test_reports_configuration_and_output_failures(void) {
   CliOptions missing = {"fcfs", 42U, "configs/missing.conf", fcfs_path};
   CliOptions bad_output = {"fcfs", 42U, "configs/small.conf",
@@ -60,6 +67,7 @@ int main(void) {
   UNITY_BEGIN();
   RUN_TEST(test_runs_small_scenario_with_fcfs);
   RUN_TEST(test_runs_small_scenario_with_priority);
+  RUN_TEST(test_runs_small_scenario_with_round_robin);
   RUN_TEST(test_reports_configuration_and_output_failures);
   return UNITY_END();
 }
