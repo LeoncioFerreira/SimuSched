@@ -22,10 +22,13 @@ typedef struct {
   CircularQueue *blocked_queue;
 
   Process **incoming_processes;
+
+  int quantum;
+  int quantum_used;
 } SimulationCore;
 
 void core_init(SimulationCore *core, Process **processes, int total_processes,
-               Scheduler *scheduler);
+               Scheduler *scheduler, int quantum);
 void core_tick(SimulationCore *core);
 bool core_is_finished(SimulationCore *core);
 void core_destroy(SimulationCore *core);

@@ -25,7 +25,8 @@ static const char *valid_config(void) {
          "min_burst_duration=1\n"
          "max_burst_duration=8\n"
          "min_cpu_bursts=1\n"
-         "max_cpu_bursts=3\n";
+         "max_cpu_bursts=3\n"
+         "quantum=2\n";
 }
 
 static void assert_config_fails(const char *content) {
@@ -56,6 +57,31 @@ void test_parses_valid_scenario(void) {
   TEST_ASSERT_EQUAL_INT(8, scenario.config.max_burst_duration);
   TEST_ASSERT_EQUAL_INT(1, scenario.config.min_cpu_bursts);
   TEST_ASSERT_EQUAL_INT(3, scenario.config.max_cpu_bursts);
+  TEST_ASSERT_EQUAL_INT(2, scenario.quantum);
+}
+
+void test_rejects_invalid_quantum(void) {
+  assert_config_fails("scenario=small\n"
+                      "total_processes=5\n"
+                      "min_arrival=0\nmax_arrival=10\n"
+                      "min_priority=1\nmax_priority=5\n"
+                      "min_burst_duration=1\nmax_burst_duration=8\n"
+                      "min_cpu_bursts=1\nmax_cpu_bursts=3\n"
+                      "quantum=0\n");
+  assert_config_fails("scenario=small\n"
+                      "total_processes=5\n"
+                      "min_arrival=0\nmax_arrival=10\n"
+                      "min_priority=1\nmax_priority=5\n"
+                      "min_burst_duration=1\nmax_burst_duration=8\n"
+                      "min_cpu_bursts=1\nmax_cpu_bursts=3\n"
+                      "quantum=-1\n");
+  assert_config_fails("scenario=small\n"
+                      "total_processes=5\n"
+                      "min_arrival=0\nmax_arrival=10\n"
+                      "min_priority=1\nmax_priority=5\n"
+                      "min_burst_duration=1\nmax_burst_duration=8\n"
+                      "min_cpu_bursts=1\nmax_cpu_bursts=3\n"
+                      "quantum=abc\n");
 }
 
 void test_rejects_missing_file(void) {
@@ -105,6 +131,7 @@ void test_rejects_invalid_values_and_ranges(void) {
 int main(void) {
   UNITY_BEGIN();
   RUN_TEST(test_parses_valid_scenario);
+  RUN_TEST(test_rejects_invalid_quantum);
   RUN_TEST(test_rejects_missing_file);
   RUN_TEST(test_rejects_unknown_and_duplicate_keys);
   RUN_TEST(test_rejects_missing_and_malformed_keys);

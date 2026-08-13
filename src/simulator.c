@@ -3,6 +3,7 @@
 #include "csv_writer.h"
 #include "fcfs.h"
 #include "priority.h"
+#include "round_robin.h"
 #include "simulation_core.h"
 #include "workload.h"
 #include <limits.h>
@@ -20,6 +21,8 @@ static Scheduler *create_scheduler(const char *algorithm, int capacity) {
     return create_fcfs_scheduler(capacity);
   if (strcmp(algorithm, "priority") == 0)
     return create_priority_scheduler();
+  if (strcmp(algorithm, "round-robin") == 0)
+    return create_round_robin_scheduler(capacity);
   return NULL;
 }
 
@@ -52,6 +55,7 @@ bool run_simulator(const CliOptions *options, char *error, size_t error_size) {
   int tick_limit;
   bool core_initialized = false;
   bool success = false;
+  int quantum = 0;
 
   if (options == NULL || options->algorithm == NULL ||
       options->config_path == NULL || options->output_path == NULL)
@@ -78,7 +82,10 @@ bool run_simulator(const CliOptions *options, char *error, size_t error_size) {
     goto cleanup;
   }
 
-  core_init(&core, workload, scenario.config.total_processes, scheduler);
+  if (strcmp(options->algorithm, "round-robin") == 0)
+    quantum = scenario.quantum;
+  core_init(&core, workload, scenario.config.total_processes, scheduler,
+            quantum);
   core_initialized = true;
   scheduler = NULL;
   if (core.blocked_queue == NULL || core.blocked_queue->data == NULL) {

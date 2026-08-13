@@ -10,7 +10,7 @@
 #include <stdlib.h>
 
 void core_init(SimulationCore *core, Process **processes, int total_processes,
-               Scheduler *scheduler) {
+               Scheduler *scheduler, int quantum) {
   core->current_time = 0;
   core->completed_processes = 0;
   core->total_processes = total_processes;
@@ -19,6 +19,9 @@ void core_init(SimulationCore *core, Process **processes, int total_processes,
 
   core->scheduler = scheduler;
   core->blocked_queue = circular_queue_create(total_processes);
+
+  core->quantum = quantum;
+  core->quantum_used = 0;
 }
 
 bool core_is_finished(SimulationCore *core) {
@@ -49,10 +52,14 @@ void core_tick(SimulationCore *core) {
   if (core->running_process == NULL && !scheduler_is_empty(core->scheduler)) {
     core->running_process = scheduler_get_next_process(core->scheduler);
     core->running_process->state = STATE_RUNNING;
+    core->quantum_used = 0;
   }
 
   if (core->running_process != NULL) {
     core->running_process->remaining_burst_time--;
+    if (core->quantum > 0) {
+      core->quantum_used++;
+    }
 
     if (core->running_process->remaining_burst_time <= 0) {
       Process *rp = core->running_process;
@@ -69,6 +76,19 @@ void core_tick(SimulationCore *core) {
         circular_queue_enqueue(core->blocked_queue, rp);
       }
       core->running_process = NULL;
+      core->quantum_used = 0;
+    } else if (core->quantum > 0 && core->quantum_used >= core->quantum) {
+      if (!scheduler_is_empty(core->scheduler)) {
+        Process *rp = core->running_process;
+        rp->state = STATE_READY;
+        rp->ready_queue_arrival_time = core->current_time + 1;
+        if (!scheduler_enqueue_process(core->scheduler, rp)) {
+          fprintf(stderr, "Erro ao preemptar processo %d\n", rp->id);
+          exit(EXIT_FAILURE);
+        }
+        core->running_process = NULL;
+      }
+      core->quantum_used = 0;
     }
   }
 

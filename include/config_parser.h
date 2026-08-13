@@ -9,6 +9,7 @@
 typedef struct {
   char name[SCENARIO_NAME_SIZE];
   ScenarioConfig config;
+  int quantum;
 } Scenario;
 
 typedef enum {
