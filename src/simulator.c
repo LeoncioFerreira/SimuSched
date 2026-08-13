@@ -78,7 +78,8 @@ bool run_simulator(const CliOptions *options, char *error, size_t error_size) {
     goto cleanup;
   }
 
-  core_init(&core, workload, scenario.config.total_processes, scheduler);
+  core_init(&core, workload, scenario.config.total_processes, scheduler,
+            scenario.config.context_switch_cost);
   core_initialized = true;
   scheduler = NULL;
   if (core.blocked_queue == NULL || core.blocked_queue->data == NULL) {
