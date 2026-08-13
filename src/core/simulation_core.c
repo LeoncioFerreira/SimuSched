@@ -10,15 +10,15 @@
 #include <stdlib.h>
 
 bool core_init(SimulationCore *core, Process **processes, int total_processes,
-               Scheduler *scheduler, int context_switch_cost) {
-  if (context_switch_cost < 0) {
+               Scheduler *scheduler, int quantum, int context_switch_cost) {
+  if (quantum < 0 || context_switch_cost < 0) {
     return false;
   }
-
   core->current_time = 0;
   core->completed_processes = 0;
   core->total_processes = total_processes;
   core->running_process = NULL;
+  core->last_running_process = NULL;
   core->incoming_processes = processes;
 
   core->context_switch_cost = context_switch_cost;
@@ -27,6 +27,9 @@ bool core_init(SimulationCore *core, Process **processes, int total_processes,
 
   core->scheduler = scheduler;
   core->blocked_queue = circular_queue_create(total_processes);
+
+  core->quantum = quantum;
+  core->quantum_used = 0;
 
   return true;
 }
@@ -60,6 +63,7 @@ void core_tick(SimulationCore *core) {
     core->running_process = scheduler_get_next_process(core->scheduler);
     if (core->running_process != NULL) {
       core->running_process->state = STATE_RUNNING;
+      core->quantum_used = 0;
     }
   }
 
@@ -78,6 +82,9 @@ void core_tick(SimulationCore *core) {
     core->current_switch_remaining--; // Ninguém executa CPU
   } else if (core->running_process != NULL) {
     core->running_process->remaining_burst_time--;
+    if (core->quantum > 0) {
+      core->quantum_used++;
+    }
 
     if (core->running_process->remaining_burst_time <= 0) {
       Process *rp = core->running_process;
@@ -94,6 +101,19 @@ void core_tick(SimulationCore *core) {
         circular_queue_enqueue(core->blocked_queue, rp);
       }
       core->running_process = NULL;
+      core->quantum_used = 0;
+    } else if (core->quantum > 0 && core->quantum_used >= core->quantum) {
+      if (!scheduler_is_empty(core->scheduler)) {
+        Process *rp = core->running_process;
+        rp->state = STATE_READY;
+        rp->ready_queue_arrival_time = core->current_time + 1;
+        if (!scheduler_enqueue_process(core->scheduler, rp)) {
+          fprintf(stderr, "Erro ao preemptar processo %d\n", rp->id);
+          exit(EXIT_FAILURE);
+        }
+        core->running_process = NULL;
+      }
+      core->quantum_used = 0;
     }
   }
 

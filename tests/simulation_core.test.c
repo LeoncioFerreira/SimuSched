@@ -43,7 +43,7 @@ void tearDown(void) {}
 
 void test_negative_switch_cost_validation(void) {
   SimulationCore core;
-  bool init_result = core_init(&core, NULL, 0, &mock_scheduler, -1);
+  bool init_result = core_init(&core, NULL, 0, &mock_scheduler, 0, -1);
   TEST_ASSERT_FALSE_MESSAGE(init_result,
                             "O core deve rejeitar custos de troca negativos");
 }
@@ -71,7 +71,7 @@ void test_parallel_io_completion(void) {
   SimulationCore core;
 
   // Inicializa com custo 0 para não interferir neste teste
-  core_init(&core, procs, 2, &mock_scheduler, 0);
+  core_init(&core, procs, 2, &mock_scheduler, 0, 0);
 
   // Insere processos na fila de bloqueados simulando que entraram em I/O
   circular_queue_enqueue(core.blocked_queue, &p1);
@@ -117,7 +117,7 @@ void test_context_switch_cpu_unavailable(void) {
   SimulationCore core;
 
   // Inicializa com custo de troca = 2 ticks
-  core_init(&core, procs, 2, &mock_scheduler, 2);
+  core_init(&core, procs, 2, &mock_scheduler, 0, 2);
 
   // Tick 0: P1 e P2 chegam. P1 vai pra CPU e termina (restava 1).
   core_tick(&core);
@@ -148,10 +148,36 @@ void test_context_switch_cpu_unavailable(void) {
   core_destroy(&core);
 }
 
+void test_dispatch_after_idle_does_not_count_context_switch(void) {
+  int first_cpu[] = {1}, second_cpu[] = {1};
+  Process first = {.id = 1,
+                   .state = STATE_NEW,
+                   .arrival_time = 0,
+                   .cpu_bursts = first_cpu,
+                   .num_bursts = 1};
+  Process second = {.id = 2,
+                    .state = STATE_NEW,
+                    .arrival_time = 2,
+                    .cpu_bursts = second_cpu,
+                    .num_bursts = 1};
+  Process *processes[] = {&first, &second};
+  SimulationCore core;
+
+  TEST_ASSERT_TRUE(core_init(&core, processes, 2, &mock_scheduler, 0, 2));
+  core_tick(&core);
+  core_tick(&core);
+  core_tick(&core);
+
+  TEST_ASSERT_EQUAL_INT(STATE_FINISHED, second.state);
+  TEST_ASSERT_EQUAL_INT(0, core.total_context_switches);
+  core_destroy(&core);
+}
+
 int main(void) {
   UNITY_BEGIN();
   RUN_TEST(test_negative_switch_cost_validation);
   RUN_TEST(test_parallel_io_completion);
   RUN_TEST(test_context_switch_cpu_unavailable);
+  RUN_TEST(test_dispatch_after_idle_does_not_count_context_switch);
   return UNITY_END();
 }

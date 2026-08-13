@@ -28,11 +28,13 @@ typedef struct {
   CircularQueue *blocked_queue;
 
   Process **incoming_processes;
+
+  int quantum;
+  int quantum_used;
 } SimulationCore;
 
-// Retorna bool para validar o custo negativo e recebe o context_switch_cost
 bool core_init(SimulationCore *core, Process **processes, int total_processes,
-               Scheduler *scheduler, int context_switch_cost);
+               Scheduler *scheduler, int quantum, int context_switch_cost);
 void core_tick(SimulationCore *core);
 bool core_is_finished(SimulationCore *core);
 void core_destroy(SimulationCore *core);
