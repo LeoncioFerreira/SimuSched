@@ -8,8 +8,14 @@ typedef struct {
   const char *algorithm;
   unsigned int seed;
   const char *scenario;
+  const char *configuration;
   int total_processes;
   int total_simulated_time;
+  int quantum;
+  int context_switch_cost;
+  double average_turnaround;
+  int context_switches;
+  double jain_slowdown;
 } RunMetadata;
 
 bool csv_write_run(const char *path, const RunMetadata *metadata, char *error,

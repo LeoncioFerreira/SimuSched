@@ -2,6 +2,7 @@
 #include "config_parser.h"
 #include "csv_writer.h"
 #include "fcfs.h"
+#include "metrics.h"
 #include "priority.h"
 #include "round_robin.h"
 #include "simulation_core.h"
@@ -57,7 +58,7 @@ bool run_simulator(const CliOptions *options, char *error, size_t error_size) {
   Process **workload = NULL;
   Scheduler *scheduler = NULL;
   SimulationCore core;
-  RunMetadata metadata;
+  RunMetadata metadata = {0};
   int tick_limit;
   bool core_initialized = false;
   bool success = false;
@@ -112,8 +113,16 @@ bool run_simulator(const CliOptions *options, char *error, size_t error_size) {
   metadata.algorithm = options->algorithm;
   metadata.seed = options->seed;
   metadata.scenario = scenario.name;
+  metadata.configuration = options->config_path;
   metadata.total_processes = scenario.config.total_processes;
   metadata.total_simulated_time = core.current_time;
+  metadata.quantum = scenario.quantum;
+  metadata.context_switch_cost = scenario.config.context_switch_cost;
+  metadata.average_turnaround =
+      calculate_average_turnaround(workload, scenario.config.total_processes);
+  metadata.context_switches = core.total_context_switches;
+  metadata.jain_slowdown =
+      calculate_jain_slowdown(workload, scenario.config.total_processes);
   if (!csv_write_run(options->output_path, &metadata, error, error_size))
     goto cleanup;
   success = true;
