@@ -118,7 +118,7 @@ void test_generated_process_structure(void) {
     TEST_ASSERT_LESS_OR_EQUAL(config.max_cpu_bursts, process->num_bursts);
     TEST_ASSERT_NOT_NULL(process->cpu_bursts);
     if (process->num_bursts > 1) {
-        TEST_ASSERT_NOT_NULL(process->io_bursts);
+      TEST_ASSERT_NOT_NULL(process->io_bursts);
     }
 
     for (int j = 0; j < process->num_bursts; j++) {

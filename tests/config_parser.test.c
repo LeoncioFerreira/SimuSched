@@ -57,7 +57,8 @@ void test_parses_valid_scenario(void) {
   TEST_ASSERT_EQUAL_INT(10, scenario.config.max_arrival);
   TEST_ASSERT_EQUAL_INT(1, scenario.config.min_priority);
   TEST_ASSERT_EQUAL_INT(5, scenario.config.max_priority);
-  TEST_ASSERT_TRUE(scenario.config.high_priority_ratio > 0.49 && scenario.config.high_priority_ratio < 0.51);
+  TEST_ASSERT_TRUE(scenario.config.high_priority_ratio > 0.49 &&
+                   scenario.config.high_priority_ratio < 0.51);
   TEST_ASSERT_EQUAL_INT(1, scenario.config.min_cpu_burst_duration);
   TEST_ASSERT_EQUAL_INT(8, scenario.config.max_cpu_burst_duration);
   TEST_ASSERT_EQUAL_INT(2, scenario.config.min_io_burst_duration);
