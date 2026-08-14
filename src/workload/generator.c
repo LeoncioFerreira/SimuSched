@@ -65,14 +65,14 @@ Process **generate_workload(const ScenarioConfig *config, unsigned int seed) {
     process->id = i;
     process->arrival_time =
         rand_range(&current_seed, config->min_arrival, config->max_arrival);
-        
+
     double prob = (double)(lcg_rand(&current_seed) % 1000) / 1000.0;
     if (prob <= config->high_priority_ratio) {
-        process->priority = config->min_priority; 
+      process->priority = config->min_priority;
     } else {
-        process->priority = config->max_priority;
+      process->priority = config->max_priority;
     }
-        
+
     process->state = STATE_NEW;
     process->num_bursts = rand_range(&current_seed, config->min_cpu_bursts,
                                      config->max_cpu_bursts);

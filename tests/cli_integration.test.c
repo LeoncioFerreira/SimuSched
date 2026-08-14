@@ -30,7 +30,9 @@ static void write_switch_config(void) {
                          "total_processes=2\n"
                          "min_arrival=0\nmax_arrival=0\n"
                          "min_priority=1\nmax_priority=1\n"
-                         "min_burst_duration=1\nmax_burst_duration=1\n"
+                         "high_priority_ratio=0.5\n"
+                         "min_cpu_burst_duration=1\nmax_cpu_burst_duration=1\n"
+                         "min_io_burst_duration=1\nmax_io_burst_duration=1\n"
                          "min_cpu_bursts=1\nmax_cpu_bursts=1\n"
                          "quantum=1\ncontext_switch_cost=10\n",
                          file) >= 0);

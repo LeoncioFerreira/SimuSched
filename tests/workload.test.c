@@ -13,8 +13,11 @@ static ScenarioConfig get_test_config(void) {
       .max_arrival = 100,
       .min_priority = 1,
       .max_priority = 5,
-      .min_burst_duration = 10,
-      .max_burst_duration = 50,
+      .high_priority_ratio = 0.5,
+      .min_cpu_burst_duration = 10,
+      .max_cpu_burst_duration = 50,
+      .min_io_burst_duration = 10,
+      .max_io_burst_duration = 50,
       .min_cpu_bursts = 2,
       .max_cpu_bursts = 8,
   };
@@ -114,7 +117,9 @@ void test_generated_process_structure(void) {
     TEST_ASSERT_GREATER_OR_EQUAL(config.min_cpu_bursts, process->num_bursts);
     TEST_ASSERT_LESS_OR_EQUAL(config.max_cpu_bursts, process->num_bursts);
     TEST_ASSERT_NOT_NULL(process->cpu_bursts);
-    TEST_ASSERT_NOT_NULL(process->io_bursts);
+    if (process->num_bursts > 1) {
+        TEST_ASSERT_NOT_NULL(process->io_bursts);
+    }
 
     for (int j = 0; j < process->num_bursts; j++) {
       TEST_ASSERT_INT_WITHIN(20, 30, process->cpu_bursts[j]);
@@ -139,7 +144,7 @@ void test_invalid_config_is_rejected(void) {
   TEST_ASSERT_NULL(generate_workload(&config, 42));
 
   config = get_test_config();
-  config.min_burst_duration = 0;
+  config.min_cpu_burst_duration = 0;
   TEST_ASSERT_NULL(generate_workload(&config, 42));
 }
 

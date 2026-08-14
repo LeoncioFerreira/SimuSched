@@ -135,10 +135,14 @@ Os arquivos em `configs/` usam o formato `chave=valor`. O cenário inicial
 - `total_processes`;
 - `min_arrival` e `max_arrival`;
 - `min_priority` e `max_priority`;
-- `min_burst_duration` e `max_burst_duration`;
-- `min_cpu_bursts` e `max_cpu_bursts`.
+- `high_priority_ratio`;
+- `min_cpu_burst_duration` e `max_cpu_burst_duration`;
+- `min_io_burst_duration` e `max_io_burst_duration`;
+- `min_cpu_bursts` e `max_cpu_bursts`;
+- `quantum`;
+- `context_switch_cost`.
 
-O intervalo de duração é usado tanto nas rajadas de CPU quanto nas rajadas de E/S. O CSV gerado contém as colunas `algorithm`, `seed`, `scenario`, `total_processes` e `total_simulated_time`.
+As rajadas de CPU e E/S e as prioridades são parametrizadas separadamente. O CSV gerado contém as colunas `algorithm`, `seed`, `scenario`, `total_processes` e `total_simulated_time`.
 
 ## ⚙️ Pipeline de Integração Contínua (CI)
 

@@ -62,7 +62,8 @@ static int parse_double(const char *text, double *value) {
   double parsed;
   errno = 0;
   parsed = strtod(text, &end);
-  if (errno == ERANGE || end == text || *end != '\0' || parsed < 0.0 || parsed > 1.0)
+  if (errno == ERANGE || end == text || *end != '\0' || parsed < 0.0 ||
+      parsed > 1.0)
     return 0;
   *value = parsed;
   return 1;
@@ -78,8 +79,7 @@ static int config_is_valid(const ScenarioConfig *config) {
          config->min_io_burst_duration >= 0 &&
          config->min_io_burst_duration <= config->max_io_burst_duration &&
          config->high_priority_ratio >= 0.0 &&
-         config->high_priority_ratio <= 1.0 &&
-         config->min_cpu_bursts > 0 &&
+         config->high_priority_ratio <= 1.0 && config->min_cpu_bursts > 0 &&
          config->min_cpu_bursts <= config->max_cpu_bursts &&
          config->context_switch_cost >= 0;
 }
