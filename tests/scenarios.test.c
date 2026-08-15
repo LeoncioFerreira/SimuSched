@@ -150,7 +150,7 @@ void test_ratio_limits(void) {
       .max_io_burst_duration = 20,
       .min_cpu_bursts = 2,
       .max_cpu_bursts = 5,
-      .context_switch_cost = 1
+      .context_switch_cost = 1,
   };
 
   Process **workload = generate_workload(&config, 111);
@@ -173,7 +173,12 @@ void test_ratio_limits(void) {
 
 void test_nan_rejection(void) {
   FILE *f = fopen("configs/test_nan.conf", "w");
-  fprintf(f, "scenario=test\ntotal_processes=10\nmin_arrival=0\nmax_arrival=1\nmin_priority=0\nmax_priority=1\nhigh_priority_ratio=NaN\nmin_cpu_burst_duration=1\nmax_cpu_burst_duration=1\nmin_io_burst_duration=1\nmax_io_burst_duration=1\nmin_cpu_bursts=1\nmax_cpu_bursts=1\nquantum=1\ncontext_switch_cost=1\n");
+  fprintf(f, "scenario=test\ntotal_processes=10\nmin_arrival=0\nmax_arrival=1\n"
+             "min_priority=0\nmax_priority=1\nhigh_priority_ratio=NaN\n"
+             "min_cpu_burst_duration=1\nmax_cpu_burst_duration=1\n"
+             "min_io_burst_duration=1\nmax_io_burst_duration=1\n"
+             "min_cpu_bursts=1\nmax_cpu_bursts=1\nquantum=1\n"
+             "context_switch_cost=1\n");
   fclose(f);
 
   Scenario scenario;

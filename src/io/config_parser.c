@@ -165,8 +165,8 @@ ConfigParseResult config_parse_file(const char *path, Scenario *scenario,
   while (fgets(line, sizeof(line), file) != NULL) {
     char *content = trim(line);
     char *separator;
-    char *key;
-    char *value;
+    const char *key;
+    const char *value;
     int *target;
     unsigned int flag;
 

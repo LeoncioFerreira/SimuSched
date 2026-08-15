@@ -15,7 +15,7 @@ static Process *fcfs_get_next_process(struct Scheduler *self) {
 }
 
 static bool fcfs_is_empty(struct Scheduler *self) {
-  CircularQueue *queue = (CircularQueue *)self->state;
+  const CircularQueue *queue = (const CircularQueue *)self->state;
   return circular_queue_is_empty(queue);
 }
 

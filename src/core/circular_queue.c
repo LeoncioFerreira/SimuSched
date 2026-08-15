@@ -23,9 +23,11 @@ CircularQueue *circular_queue_create(int capacity) {
   return q;
 }
 
-bool circular_queue_is_empty(CircularQueue *q) { return q->size == 0; }
+bool circular_queue_is_empty(const CircularQueue *q) { return q->size == 0; }
 
-bool circular_queue_is_full(CircularQueue *q) { return q->size == q->capacity; }
+bool circular_queue_is_full(const CircularQueue *q) {
+  return q->size == q->capacity;
+}
 
 // Inseri na fila (enqueue)
 bool circular_queue_enqueue(CircularQueue *q, Process *p) {
