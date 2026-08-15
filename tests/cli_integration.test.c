@@ -40,8 +40,8 @@ static void write_switch_config(void) {
 static void assert_run_writes_csv(const char *algorithm, const char *path) {
   CliOptions options = {algorithm, 42U, "configs/small.conf", path};
   char error[256];
-  char header[256];
-  char row[256];
+  char header[512];
+  char row[512];
   FILE *file;
 
   TEST_ASSERT_TRUE(run_simulator(&options, error, sizeof(error)));
@@ -49,11 +49,15 @@ static void assert_run_writes_csv(const char *algorithm, const char *path) {
   TEST_ASSERT_NOT_NULL(file);
   TEST_ASSERT_NOT_NULL(fgets(header, sizeof(header), file));
   TEST_ASSERT_EQUAL_STRING(
-      "algorithm,seed,scenario,total_processes,total_simulated_time\n", header);
+      "algorithm,seed,scenario,configuration,total_processes,"
+      "total_simulated_time,quantum,context_switch_cost,average_turnaround,"
+      "context_switches,jain_slowdown\n",
+      header);
   TEST_ASSERT_NOT_NULL(fgets(row, sizeof(row), file));
   fclose(file);
   TEST_ASSERT_EQUAL_INT(0, strncmp(row, algorithm, strlen(algorithm)));
-  TEST_ASSERT_NOT_NULL(strstr(row, ",42,small,5,"));
+  TEST_ASSERT_NOT_NULL(strstr(row, ",42,small,configs/small.conf,5,"));
+  TEST_ASSERT_NOT_NULL(strstr(row, ",2,1,"));
 }
 
 void test_runs_small_scenario_with_fcfs(void) {
@@ -71,10 +75,22 @@ void test_runs_small_scenario_with_round_robin(void) {
 void test_tick_limit_includes_context_switch_cost(void) {
   CliOptions options = {"fcfs", 42U, switch_config_path, fcfs_path};
   char error[256];
+  char header[512];
+  char row[512];
+  FILE *file;
 
   write_switch_config();
   TEST_ASSERT_TRUE_MESSAGE(run_simulator(&options, error, sizeof(error)),
                            error);
+  file = fopen(fcfs_path, "r");
+  TEST_ASSERT_NOT_NULL(file);
+  TEST_ASSERT_NOT_NULL(fgets(header, sizeof(header), file));
+  TEST_ASSERT_NOT_NULL(fgets(row, sizeof(row), file));
+  fclose(file);
+  TEST_ASSERT_EQUAL_STRING(
+      "fcfs,42,context-switch,tests/tmp_context_switch.conf,2,12,1,10,"
+      "6.500000,1,0.582759\n",
+      row);
 }
 
 void test_reports_configuration_and_output_failures(void) {
