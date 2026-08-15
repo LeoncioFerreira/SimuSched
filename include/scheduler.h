@@ -8,13 +8,13 @@ typedef struct Scheduler {
   void *state;
 
   bool (*enqueue_process)(struct Scheduler *self, Process *p);
-  Process *(*get_next_process)(struct Scheduler *self);
+  Process *(*get_next_process)(struct Scheduler *self, int current_time);
   bool (*is_empty)(struct Scheduler *self);
   void (*destroy)(struct Scheduler *self);
 } Scheduler;
 
 bool scheduler_enqueue_process(Scheduler *scheduler, Process *process);
-Process *scheduler_get_next_process(Scheduler *scheduler);
+Process *scheduler_get_next_process(Scheduler *scheduler, int current_time);
 bool scheduler_is_empty(Scheduler *scheduler);
 void scheduler_destroy(Scheduler *scheduler);
 

@@ -6,6 +6,7 @@
 #include "priority.h"
 #include "round_robin.h"
 #include "simulation_core.h"
+#include "tej.h"
 #include "workload.h"
 #include <limits.h>
 #include <stdio.h>
@@ -17,13 +18,17 @@ static bool fail(char *error, size_t error_size, const char *message) {
   return false;
 }
 
-static Scheduler *create_scheduler(const char *algorithm, int capacity) {
+static Scheduler *create_scheduler(const char *algorithm,
+                                   const ScenarioConfig *config) {
   if (strcmp(algorithm, "fcfs") == 0)
-    return create_fcfs_scheduler(capacity);
+    return create_fcfs_scheduler(config->total_processes);
   if (strcmp(algorithm, "priority") == 0)
     return create_priority_scheduler();
   if (strcmp(algorithm, "round-robin") == 0)
-    return create_round_robin_scheduler(capacity);
+    return create_round_robin_scheduler(config->total_processes);
+  if (strcmp(algorithm, "tej") == 0)
+    return create_tej_scheduler(config->total_processes, config->min_priority,
+                                config->rescue_interval);
   return NULL;
 }
 
@@ -82,8 +87,7 @@ bool run_simulator(const CliOptions *options, char *error, size_t error_size) {
     goto cleanup;
   }
 
-  scheduler =
-      create_scheduler(options->algorithm, scenario.config.total_processes);
+  scheduler = create_scheduler(options->algorithm, &scenario.config);
   if (scheduler == NULL) {
     fail(error, error_size, "falha ao criar o escalonador");
     goto cleanup;
@@ -118,6 +122,7 @@ bool run_simulator(const CliOptions *options, char *error, size_t error_size) {
   metadata.total_simulated_time = core.current_time;
   metadata.quantum = scenario.quantum;
   metadata.context_switch_cost = scenario.config.context_switch_cost;
+  metadata.rescue_interval = scenario.config.rescue_interval;
   metadata.average_turnaround =
       calculate_average_turnaround(workload, scenario.config.total_processes);
   metadata.context_switches = core.total_context_switches;

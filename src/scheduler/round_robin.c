@@ -14,7 +14,8 @@ static bool round_robin_enqueue(Scheduler *self, Process *process) {
   return circular_queue_enqueue(queue, process);
 }
 
-static Process *round_robin_get_next(Scheduler *self) {
+static Process *round_robin_get_next(Scheduler *self, int current_time) {
+  (void)current_time;
   CircularQueue *queue = self->state;
   return circular_queue_dequeue(queue);
 }

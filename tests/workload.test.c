@@ -20,6 +20,7 @@ static ScenarioConfig get_test_config(void) {
       .max_io_burst_duration = 50,
       .min_cpu_bursts = 2,
       .max_cpu_bursts = 8,
+      .rescue_interval = 10,
   };
   return config;
 }

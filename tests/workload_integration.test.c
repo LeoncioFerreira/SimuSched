@@ -22,6 +22,7 @@ void test_generated_workload_runs_in_simulation_core(void) {
       .max_io_burst_duration = 1,
       .min_cpu_bursts = 2,
       .max_cpu_bursts = 2,
+      .rescue_interval = 10,
   };
 
   Process **processes = generate_workload(&config, 42);

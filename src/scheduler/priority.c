@@ -65,7 +65,9 @@ static bool priority_enqueue_process(struct Scheduler *self, Process *p) {
   return true;
 }
 
-static Process *priority_get_next_process(struct Scheduler *self) {
+static Process *priority_get_next_process(struct Scheduler *self,
+                                          int current_time) {
+  (void)current_time;
   Priority_Queue *queue = (Priority_Queue *)self->state;
 
   if (queue->head == NULL) {

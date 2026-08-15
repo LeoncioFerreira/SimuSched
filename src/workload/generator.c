@@ -26,7 +26,8 @@ static bool config_is_valid(const ScenarioConfig *config) {
          config->min_io_burst_duration >= 0 &&
          config->min_io_burst_duration <= config->max_io_burst_duration &&
          config->min_cpu_bursts > 0 &&
-         config->min_cpu_bursts <= config->max_cpu_bursts;
+         config->min_cpu_bursts <= config->max_cpu_bursts &&
+         config->rescue_interval > 0;
 }
 
 void free_workload(Process **workload, int total_processes) {

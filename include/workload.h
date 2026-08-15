@@ -17,6 +17,7 @@ typedef struct {
   int min_io_burst_duration;
   int max_io_burst_duration;
   int context_switch_cost;
+  int rescue_interval;
 } ScenarioConfig;
 
 Process **generate_workload(const ScenarioConfig *config, unsigned int seed);

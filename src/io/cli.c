@@ -55,9 +55,9 @@ CliParseResult cli_parse(int argc, char **argv, CliOptions *options,
     if (strcmp(name, "--algorithm") == 0) {
       flag = OPTION_ALGORITHM;
       if (strcmp(value, "fcfs") != 0 && strcmp(value, "priority") != 0 &&
-          strcmp(value, "round-robin") != 0)
+          strcmp(value, "round-robin") != 0 && strcmp(value, "tej") != 0)
         return fail(error, error_size,
-                    "algoritmo deve ser fcfs, priority ou round-robin");
+                    "algoritmo deve ser fcfs, priority, round-robin ou tej");
       options->algorithm = value;
     } else if (strcmp(name, "--seed") == 0) {
       flag = OPTION_SEED;
@@ -93,7 +93,7 @@ CliParseResult cli_parse(int argc, char **argv, CliOptions *options,
 void cli_print_usage(FILE *stream, const char *program_name) {
   const char *name = program_name == NULL ? "simulador" : program_name;
   fprintf(stream,
-          "Uso: %s --algorithm <fcfs|priority|round-robin> --seed <n> "
+          "Uso: %s --algorithm <fcfs|priority|round-robin|tej> --seed <n> "
           "--config <arquivo> "
           "--output <csv>\n",
           name);

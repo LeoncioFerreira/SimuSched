@@ -13,6 +13,7 @@ typedef struct {
   int total_simulated_time;
   int quantum;
   int context_switch_cost;
+  int rescue_interval;
   double average_turnaround;
   int context_switches;
   double jain_slowdown;

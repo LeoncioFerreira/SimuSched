@@ -19,6 +19,7 @@ void test_writes_header_and_run_metadata(void) {
       .total_simulated_time = 37,
       .quantum = 2,
       .context_switch_cost = 1,
+      .rescue_interval = 10,
       .average_turnaround = 12.5,
       .context_switches = 4,
       .jain_slowdown = 0.875,
@@ -33,12 +34,13 @@ void test_writes_header_and_run_metadata(void) {
   TEST_ASSERT_NOT_NULL(fgets(content, sizeof(content), file));
   TEST_ASSERT_EQUAL_STRING(
       "algorithm,seed,scenario,configuration,total_processes,"
-      "total_simulated_time,quantum,context_switch_cost,average_turnaround,"
+      "total_simulated_time,quantum,context_switch_cost,rescue_interval,"
+      "average_turnaround,"
       "context_switches,jain_slowdown\n",
       content);
   TEST_ASSERT_NOT_NULL(fgets(content, sizeof(content), file));
   TEST_ASSERT_EQUAL_STRING(
-      "fcfs,42,small,configs/small.conf,5,37,2,1,12.500000,4,0.875000\n",
+      "fcfs,42,small,configs/small.conf,5,37,2,1,10,12.500000,4,0.875000\n",
       content);
   TEST_ASSERT_NULL(fgets(content, sizeof(content), file));
   fclose(file);
@@ -54,6 +56,7 @@ void test_rejects_invalid_path_and_null_metadata(void) {
       .total_simulated_time = 37,
       .quantum = 2,
       .context_switch_cost = 1,
+      .rescue_interval = 10,
       .average_turnaround = 12.5,
       .context_switches = 4,
       .jain_slowdown = 0.875,
@@ -74,6 +77,7 @@ void test_rejects_unsafe_text_fields(void) {
       .total_simulated_time = 37,
       .quantum = 2,
       .context_switch_cost = 1,
+      .rescue_interval = 10,
       .average_turnaround = 12.5,
       .context_switches = 4,
       .jain_slowdown = 0.875,
@@ -104,6 +108,7 @@ void test_rejects_non_finite_metrics(void) {
       .total_simulated_time = 37,
       .quantum = 2,
       .context_switch_cost = 1,
+      .rescue_interval = 10,
       .average_turnaround = 12.5,
       .context_switches = 4,
       .jain_slowdown = 0.875,
@@ -111,16 +116,20 @@ void test_rejects_non_finite_metrics(void) {
   RunMetadata nan_turnaround = valid;
   RunMetadata nan_jain = valid;
   RunMetadata infinite_jain = valid;
+  RunMetadata invalid_rescue_interval = valid;
   char error[256];
   nan_turnaround.average_turnaround = NAN;
   nan_jain.jain_slowdown = NAN;
   infinite_jain.jain_slowdown = INFINITY;
+  invalid_rescue_interval.rescue_interval = 0;
 
   TEST_ASSERT_FALSE(
       csv_write_run(test_path, &nan_turnaround, error, sizeof(error)));
   TEST_ASSERT_FALSE(csv_write_run(test_path, &nan_jain, error, sizeof(error)));
   TEST_ASSERT_FALSE(
       csv_write_run(test_path, &infinite_jain, error, sizeof(error)));
+  TEST_ASSERT_FALSE(
+      csv_write_run(test_path, &invalid_rescue_interval, error, sizeof(error)));
 }
 
 int main(void) {

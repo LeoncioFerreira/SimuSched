@@ -7,12 +7,14 @@
 static const char *fcfs_path = "tests/tmp_fcfs.csv";
 static const char *priority_path = "tests/tmp_priority.csv";
 static const char *round_robin_path = "tests/tmp_round_robin.csv";
+static const char *tej_path = "tests/tmp_tej.csv";
 static const char *switch_config_path = "tests/tmp_context_switch.conf";
 
 void setUp(void) {
   remove(fcfs_path);
   remove(priority_path);
   remove(round_robin_path);
+  remove(tej_path);
   remove(switch_config_path);
 }
 
@@ -20,6 +22,7 @@ void tearDown(void) {
   remove(fcfs_path);
   remove(priority_path);
   remove(round_robin_path);
+  remove(tej_path);
   remove(switch_config_path);
 }
 
@@ -34,7 +37,8 @@ static void write_switch_config(void) {
                          "min_cpu_burst_duration=1\nmax_cpu_burst_duration=1\n"
                          "min_io_burst_duration=1\nmax_io_burst_duration=1\n"
                          "min_cpu_bursts=1\nmax_cpu_bursts=1\n"
-                         "quantum=1\ncontext_switch_cost=10\n",
+                         "quantum=1\ncontext_switch_cost=10\n"
+                         "rescue_interval=10\n",
                          file) >= 0);
   TEST_ASSERT_EQUAL_INT(0, fclose(file));
 }
@@ -52,14 +56,15 @@ static void assert_run_writes_csv(const char *algorithm, const char *path) {
   TEST_ASSERT_NOT_NULL(fgets(header, sizeof(header), file));
   TEST_ASSERT_EQUAL_STRING(
       "algorithm,seed,scenario,configuration,total_processes,"
-      "total_simulated_time,quantum,context_switch_cost,average_turnaround,"
+      "total_simulated_time,quantum,context_switch_cost,rescue_interval,"
+      "average_turnaround,"
       "context_switches,jain_slowdown\n",
       header);
   TEST_ASSERT_NOT_NULL(fgets(row, sizeof(row), file));
   fclose(file);
   TEST_ASSERT_EQUAL_INT(0, strncmp(row, algorithm, strlen(algorithm)));
   TEST_ASSERT_NOT_NULL(strstr(row, ",42,small,configs/small.conf,5,"));
-  TEST_ASSERT_NOT_NULL(strstr(row, ",2,1,"));
+  TEST_ASSERT_NOT_NULL(strstr(row, ",2,1,10,"));
 }
 
 void test_runs_small_scenario_with_fcfs(void) {
@@ -72,6 +77,10 @@ void test_runs_small_scenario_with_priority(void) {
 
 void test_runs_small_scenario_with_round_robin(void) {
   assert_run_writes_csv("round-robin", round_robin_path);
+}
+
+void test_runs_small_scenario_with_tej(void) {
+  assert_run_writes_csv("tej", tej_path);
 }
 
 void test_tick_limit_includes_context_switch_cost(void) {
@@ -90,7 +99,7 @@ void test_tick_limit_includes_context_switch_cost(void) {
   TEST_ASSERT_NOT_NULL(fgets(row, sizeof(row), file));
   fclose(file);
   TEST_ASSERT_EQUAL_STRING(
-      "fcfs,42,context-switch,tests/tmp_context_switch.conf,2,12,1,10,"
+      "fcfs,42,context-switch,tests/tmp_context_switch.conf,2,12,1,10,10,"
       "6.500000,1,0.582759\n",
       row);
 }
@@ -112,6 +121,7 @@ int main(void) {
   RUN_TEST(test_runs_small_scenario_with_fcfs);
   RUN_TEST(test_runs_small_scenario_with_priority);
   RUN_TEST(test_runs_small_scenario_with_round_robin);
+  RUN_TEST(test_runs_small_scenario_with_tej);
   RUN_TEST(test_tick_limit_includes_context_switch_cost);
   RUN_TEST(test_reports_configuration_and_output_failures);
   return UNITY_END();

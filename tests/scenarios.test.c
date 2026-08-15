@@ -151,6 +151,7 @@ void test_ratio_limits(void) {
       .min_cpu_bursts = 2,
       .max_cpu_bursts = 5,
       .context_switch_cost = 1,
+      .rescue_interval = 10,
   };
 
   Process **workload = generate_workload(&config, 111);
@@ -178,7 +179,7 @@ void test_nan_rejection(void) {
              "min_cpu_burst_duration=1\nmax_cpu_burst_duration=1\n"
              "min_io_burst_duration=1\nmax_io_burst_duration=1\n"
              "min_cpu_bursts=1\nmax_cpu_bursts=1\nquantum=1\n"
-             "context_switch_cost=1\n");
+             "context_switch_cost=1\nrescue_interval=10\n");
   fclose(f);
 
   Scenario scenario;

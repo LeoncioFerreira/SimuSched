@@ -19,8 +19,8 @@ void test_round_robin_selects_processes_in_fifo_order(void) {
   TEST_ASSERT_NOT_NULL(scheduler);
   TEST_ASSERT_TRUE(scheduler_enqueue_process(scheduler, &first));
   TEST_ASSERT_TRUE(scheduler_enqueue_process(scheduler, &second));
-  TEST_ASSERT_EQUAL_PTR(&first, scheduler_get_next_process(scheduler));
-  TEST_ASSERT_EQUAL_PTR(&second, scheduler_get_next_process(scheduler));
+  TEST_ASSERT_EQUAL_PTR(&first, scheduler_get_next_process(scheduler, 0));
+  TEST_ASSERT_EQUAL_PTR(&second, scheduler_get_next_process(scheduler, 0));
   TEST_ASSERT_TRUE(scheduler_is_empty(scheduler));
 
   scheduler_destroy(scheduler);

@@ -28,6 +28,7 @@ bool csv_write_run(const char *path, const RunMetadata *metadata, char *error,
     return fail(error, error_size, "campo textual nao pode ser gravado no CSV");
   if (metadata->total_processes <= 0 || metadata->total_simulated_time < 0 ||
       metadata->quantum < 0 || metadata->context_switch_cost < 0 ||
+      metadata->rescue_interval <= 0 ||
       !isfinite(metadata->average_turnaround) ||
       metadata->average_turnaround < 0.0 || metadata->context_switches < 0 ||
       !isfinite(metadata->jain_slowdown) || metadata->jain_slowdown < 0.0 ||
@@ -42,13 +43,15 @@ bool csv_write_run(const char *path, const RunMetadata *metadata, char *error,
       fprintf(file,
               "algorithm,seed,scenario,configuration,total_processes,"
               "total_simulated_time,quantum,context_switch_cost,"
-              "average_turnaround,context_switches,jain_slowdown\n"
-              "%s,%u,%s,%s,%d,%d,%d,%d,%.6f,%d,%.6f\n",
+              "rescue_interval,average_turnaround,context_switches,"
+              "jain_slowdown\n"
+              "%s,%u,%s,%s,%d,%d,%d,%d,%d,%.6f,%d,%.6f\n",
               metadata->algorithm, metadata->seed, metadata->scenario,
               metadata->configuration, metadata->total_processes,
               metadata->total_simulated_time, metadata->quantum,
-              metadata->context_switch_cost, metadata->average_turnaround,
-              metadata->context_switches, metadata->jain_slowdown);
+              metadata->context_switch_cost, metadata->rescue_interval,
+              metadata->average_turnaround, metadata->context_switches,
+              metadata->jain_slowdown);
   if (write_result < 0) {
     fclose(file);
     return fail(error, error_size, "falha ao gravar o arquivo CSV");

@@ -60,7 +60,8 @@ void core_tick(SimulationCore *core) {
 
   // Em execução
   if (core->running_process == NULL && !scheduler_is_empty(core->scheduler)) {
-    core->running_process = scheduler_get_next_process(core->scheduler);
+    core->running_process =
+        scheduler_get_next_process(core->scheduler, core->current_time);
     if (core->running_process != NULL) {
       core->running_process->state = STATE_RUNNING;
       core->quantum_used = 0;
