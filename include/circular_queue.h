@@ -22,8 +22,8 @@ typedef struct {
 CircularQueue *circular_queue_create(int capacity);
 bool circular_queue_enqueue(CircularQueue *q, Process *p);
 Process *circular_queue_dequeue(CircularQueue *q);
-bool circular_queue_is_empty(CircularQueue *q);
-bool circular_queue_is_full(CircularQueue *q);
+bool circular_queue_is_empty(const CircularQueue *q);
+bool circular_queue_is_full(const CircularQueue *q);
 void circular_queue_destroy(CircularQueue *q);
 
 #endif

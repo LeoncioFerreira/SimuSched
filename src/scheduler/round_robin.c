@@ -20,7 +20,7 @@ static Process *round_robin_get_next(Scheduler *self) {
 }
 
 static bool round_robin_is_empty(Scheduler *self) {
-  CircularQueue *queue = self->state;
+  const CircularQueue *queue = self->state;
   return circular_queue_is_empty(queue);
 }
 

@@ -2,6 +2,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -13,13 +14,16 @@ enum {
   KEY_MAX_ARRIVAL = 1U << 3,
   KEY_MIN_PRIORITY = 1U << 4,
   KEY_MAX_PRIORITY = 1U << 5,
-  KEY_MIN_BURST = 1U << 6,
-  KEY_MAX_BURST = 1U << 7,
-  KEY_MIN_CPU_BURSTS = 1U << 8,
-  KEY_MAX_CPU_BURSTS = 1U << 9,
-  KEY_QUANTUM = 1U << 10,
-  KEY_CONTEXT_SWITCH_COST = 1U << 11,
-  ALL_KEYS = (1U << 12) - 1U,
+  KEY_HIGH_PRIORITY_RATIO = 1U << 6,
+  KEY_MIN_CPU_BURST = 1U << 7,
+  KEY_MAX_CPU_BURST = 1U << 8,
+  KEY_MIN_IO_BURST = 1U << 9,
+  KEY_MAX_IO_BURST = 1U << 10,
+  KEY_MIN_CPU_BURSTS = 1U << 11,
+  KEY_MAX_CPU_BURSTS = 1U << 12,
+  KEY_QUANTUM = 1U << 13,
+  KEY_CONTEXT_SWITCH_COST = 1U << 14,
+  ALL_KEYS = (1U << 15) - 1U,
 };
 
 static ConfigParseResult fail(char *error, size_t error_size,
@@ -54,14 +58,29 @@ static int parse_int(const char *text, int *value) {
   return 1;
 }
 
+static int parse_double(const char *text, double *value) {
+  char *end = NULL;
+  double parsed;
+  errno = 0;
+  parsed = strtod(text, &end);
+  if (errno == ERANGE || end == text || *end != '\0' || !isfinite(parsed) ||
+      parsed < 0.0 || parsed > 1.0)
+    return 0;
+  *value = parsed;
+  return 1;
+}
+
 static int config_is_valid(const ScenarioConfig *config) {
   return config->total_processes > 0 && config->min_arrival >= 0 &&
          config->min_arrival <= config->max_arrival &&
          config->min_priority >= 0 &&
          config->min_priority <= config->max_priority &&
-         config->min_burst_duration > 0 &&
-         config->min_burst_duration <= config->max_burst_duration &&
-         config->min_cpu_bursts > 0 &&
+         config->min_cpu_burst_duration > 0 &&
+         config->min_cpu_burst_duration <= config->max_cpu_burst_duration &&
+         config->min_io_burst_duration >= 0 &&
+         config->min_io_burst_duration <= config->max_io_burst_duration &&
+         config->high_priority_ratio >= 0.0 &&
+         config->high_priority_ratio <= 1.0 && config->min_cpu_bursts > 0 &&
          config->min_cpu_bursts <= config->max_cpu_bursts &&
          config->context_switch_cost >= 0;
 }
@@ -92,13 +111,24 @@ static unsigned int key_flag(const char *key, int **target,
     *target = &config->max_priority;
     return KEY_MAX_PRIORITY;
   }
-  if (strcmp(key, "min_burst_duration") == 0) {
-    *target = &config->min_burst_duration;
-    return KEY_MIN_BURST;
+  if (strcmp(key, "high_priority_ratio") == 0) {
+    return KEY_HIGH_PRIORITY_RATIO;
   }
-  if (strcmp(key, "max_burst_duration") == 0) {
-    *target = &config->max_burst_duration;
-    return KEY_MAX_BURST;
+  if (strcmp(key, "min_cpu_burst_duration") == 0) {
+    *target = &config->min_cpu_burst_duration;
+    return KEY_MIN_CPU_BURST;
+  }
+  if (strcmp(key, "max_cpu_burst_duration") == 0) {
+    *target = &config->max_cpu_burst_duration;
+    return KEY_MAX_CPU_BURST;
+  }
+  if (strcmp(key, "min_io_burst_duration") == 0) {
+    *target = &config->min_io_burst_duration;
+    return KEY_MIN_IO_BURST;
+  }
+  if (strcmp(key, "max_io_burst_duration") == 0) {
+    *target = &config->max_io_burst_duration;
+    return KEY_MAX_IO_BURST;
   }
   if (strcmp(key, "min_cpu_bursts") == 0) {
     *target = &config->min_cpu_bursts;
@@ -135,8 +165,8 @@ ConfigParseResult config_parse_file(const char *path, Scenario *scenario,
   while (fgets(line, sizeof(line), file) != NULL) {
     char *content = trim(line);
     char *separator;
-    char *key;
-    char *value;
+    const char *key;
+    const char *value;
     int *target;
     unsigned int flag;
 
@@ -171,6 +201,11 @@ ConfigParseResult config_parse_file(const char *path, Scenario *scenario,
         return fail(error, error_size, "nome do cenario muito longo");
       }
       strcpy(scenario->name, value);
+    } else if (flag == KEY_HIGH_PRIORITY_RATIO) {
+      if (!parse_double(value, &scenario->config.high_priority_ratio)) {
+        fclose(file);
+        return fail(error, error_size, "valor decimal invalido para ratio");
+      }
     } else if (!parse_int(value, target)) {
       fclose(file);
       return fail(error, error_size, "valor inteiro invalido");

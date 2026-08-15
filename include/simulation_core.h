@@ -36,7 +36,7 @@ typedef struct {
 bool core_init(SimulationCore *core, Process **processes, int total_processes,
                Scheduler *scheduler, int quantum, int context_switch_cost);
 void core_tick(SimulationCore *core);
-bool core_is_finished(SimulationCore *core);
+bool core_is_finished(const SimulationCore *core);
 void core_destroy(SimulationCore *core);
 
 #endif

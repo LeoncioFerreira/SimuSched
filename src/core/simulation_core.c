@@ -34,7 +34,7 @@ bool core_init(SimulationCore *core, Process **processes, int total_processes,
   return true;
 }
 
-bool core_is_finished(SimulationCore *core) {
+bool core_is_finished(const SimulationCore *core) {
   return core->completed_processes == core->total_processes;
 }
 

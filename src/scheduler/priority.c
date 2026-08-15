@@ -13,7 +13,7 @@ typedef struct Priority_Queue {
   Priority_Node *head;
 } Priority_Queue;
 
-static int has_preference(Process *p1, Process *p2) {
+static int has_preference(const Process *p1, const Process *p2) {
   if (p1->priority < p2->priority) {
     return 1;
   }
@@ -83,7 +83,7 @@ static Process *priority_get_next_process(struct Scheduler *self) {
 }
 
 static bool priority_is_empty(struct Scheduler *self) {
-  Priority_Queue *queue = (Priority_Queue *)self->state;
+  const Priority_Queue *queue = (const Priority_Queue *)self->state;
   return queue->head == NULL;
 }
 

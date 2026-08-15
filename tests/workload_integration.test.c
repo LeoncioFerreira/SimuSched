@@ -15,8 +15,11 @@ void test_generated_workload_runs_in_simulation_core(void) {
       .max_arrival = 0,
       .min_priority = 1,
       .max_priority = 2,
-      .min_burst_duration = 1,
-      .max_burst_duration = 1,
+      .high_priority_ratio = 0.5,
+      .min_cpu_burst_duration = 1,
+      .max_cpu_burst_duration = 1,
+      .min_io_burst_duration = 1,
+      .max_io_burst_duration = 1,
       .min_cpu_bursts = 2,
       .max_cpu_bursts = 2,
   };

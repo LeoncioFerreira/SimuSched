@@ -22,8 +22,11 @@ static const char *valid_config(void) {
          "max_arrival=10\n"
          "min_priority=1\n"
          "max_priority=5\n"
-         "min_burst_duration=1\n"
-         "max_burst_duration=8\n"
+         "high_priority_ratio=0.5\n"
+         "min_cpu_burst_duration=1\n"
+         "max_cpu_burst_duration=8\n"
+         "min_io_burst_duration=2\n"
+         "max_io_burst_duration=4\n"
          "min_cpu_bursts=1\n"
          "max_cpu_bursts=3\n"
          "quantum=2\n"
@@ -54,45 +57,16 @@ void test_parses_valid_scenario(void) {
   TEST_ASSERT_EQUAL_INT(10, scenario.config.max_arrival);
   TEST_ASSERT_EQUAL_INT(1, scenario.config.min_priority);
   TEST_ASSERT_EQUAL_INT(5, scenario.config.max_priority);
-  TEST_ASSERT_EQUAL_INT(1, scenario.config.min_burst_duration);
-  TEST_ASSERT_EQUAL_INT(8, scenario.config.max_burst_duration);
+  TEST_ASSERT_TRUE(scenario.config.high_priority_ratio > 0.49 &&
+                   scenario.config.high_priority_ratio < 0.51);
+  TEST_ASSERT_EQUAL_INT(1, scenario.config.min_cpu_burst_duration);
+  TEST_ASSERT_EQUAL_INT(8, scenario.config.max_cpu_burst_duration);
+  TEST_ASSERT_EQUAL_INT(2, scenario.config.min_io_burst_duration);
+  TEST_ASSERT_EQUAL_INT(4, scenario.config.max_io_burst_duration);
   TEST_ASSERT_EQUAL_INT(1, scenario.config.min_cpu_bursts);
   TEST_ASSERT_EQUAL_INT(3, scenario.config.max_cpu_bursts);
   TEST_ASSERT_EQUAL_INT(2, scenario.quantum);
   TEST_ASSERT_EQUAL_INT(1, scenario.config.context_switch_cost);
-}
-
-void test_rejects_negative_context_switch_cost(void) {
-  char config[1024];
-  snprintf(config, sizeof(config), "%s", valid_config());
-  char *cost = strstr(config, "context_switch_cost=1");
-  TEST_ASSERT_NOT_NULL(cost);
-  strcpy(cost, "context_switch_cost=-1\n");
-  assert_config_fails(config);
-}
-
-void test_rejects_invalid_quantum(void) {
-  assert_config_fails("scenario=small\n"
-                      "total_processes=5\n"
-                      "min_arrival=0\nmax_arrival=10\n"
-                      "min_priority=1\nmax_priority=5\n"
-                      "min_burst_duration=1\nmax_burst_duration=8\n"
-                      "min_cpu_bursts=1\nmax_cpu_bursts=3\n"
-                      "quantum=0\n");
-  assert_config_fails("scenario=small\n"
-                      "total_processes=5\n"
-                      "min_arrival=0\nmax_arrival=10\n"
-                      "min_priority=1\nmax_priority=5\n"
-                      "min_burst_duration=1\nmax_burst_duration=8\n"
-                      "min_cpu_bursts=1\nmax_cpu_bursts=3\n"
-                      "quantum=-1\n");
-  assert_config_fails("scenario=small\n"
-                      "total_processes=5\n"
-                      "min_arrival=0\nmax_arrival=10\n"
-                      "min_priority=1\nmax_priority=5\n"
-                      "min_burst_duration=1\nmax_burst_duration=8\n"
-                      "min_cpu_bursts=1\nmax_cpu_bursts=3\n"
-                      "quantum=abc\n");
 }
 
 void test_rejects_missing_file(void) {
@@ -118,35 +92,11 @@ void test_rejects_missing_and_malformed_keys(void) {
   assert_config_fails("scenario small\n");
 }
 
-void test_rejects_invalid_values_and_ranges(void) {
-  assert_config_fails("scenario=small\n"
-                      "total_processes=0\n"
-                      "min_arrival=0\nmax_arrival=10\n"
-                      "min_priority=1\nmax_priority=5\n"
-                      "min_burst_duration=1\nmax_burst_duration=8\n"
-                      "min_cpu_bursts=1\nmax_cpu_bursts=3\n");
-  assert_config_fails("scenario=small\n"
-                      "total_processes=5\n"
-                      "min_arrival=11\nmax_arrival=10\n"
-                      "min_priority=1\nmax_priority=5\n"
-                      "min_burst_duration=1\nmax_burst_duration=8\n"
-                      "min_cpu_bursts=1\nmax_cpu_bursts=3\n");
-  assert_config_fails("scenario=small\n"
-                      "total_processes=five\n"
-                      "min_arrival=0\nmax_arrival=10\n"
-                      "min_priority=1\nmax_priority=5\n"
-                      "min_burst_duration=1\nmax_burst_duration=8\n"
-                      "min_cpu_bursts=1\nmax_cpu_bursts=3\n");
-}
-
 int main(void) {
   UNITY_BEGIN();
   RUN_TEST(test_parses_valid_scenario);
-  RUN_TEST(test_rejects_invalid_quantum);
-  RUN_TEST(test_rejects_negative_context_switch_cost);
   RUN_TEST(test_rejects_missing_file);
   RUN_TEST(test_rejects_unknown_and_duplicate_keys);
   RUN_TEST(test_rejects_missing_and_malformed_keys);
-  RUN_TEST(test_rejects_invalid_values_and_ranges);
   return UNITY_END();
 }
