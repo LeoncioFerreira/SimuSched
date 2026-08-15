@@ -7,10 +7,10 @@ bool scheduler_enqueue_process(Scheduler *scheduler, Process *process) {
   return scheduler->enqueue_process(scheduler, process);
 }
 
-Process *scheduler_get_next_process(Scheduler *scheduler) {
+Process *scheduler_get_next_process(Scheduler *scheduler, int current_time) {
   if (!scheduler || !scheduler->get_next_process)
     return NULL;
-  return scheduler->get_next_process(scheduler);
+  return scheduler->get_next_process(scheduler, current_time);
 }
 
 bool scheduler_is_empty(Scheduler *scheduler) {

@@ -11,7 +11,7 @@ void setUp(void) { sched = create_priority_scheduler(); }
 void tearDown(void) { scheduler_destroy(sched); }
 
 void test_empty_queue(void) {
-  Process *p = scheduler_get_next_process(sched);
+  Process *p = scheduler_get_next_process(sched, 0);
   TEST_ASSERT_NULL(p);
 }
 
@@ -33,10 +33,10 @@ void test_higher_priority_first(void) {
   scheduler_enqueue_process(sched, &p2);
   scheduler_enqueue_process(sched, &p3);
 
-  TEST_ASSERT_EQUAL_INT(2, scheduler_get_next_process(sched)->id);
-  TEST_ASSERT_EQUAL_INT(1, scheduler_get_next_process(sched)->id);
-  TEST_ASSERT_EQUAL_INT(3, scheduler_get_next_process(sched)->id);
-  TEST_ASSERT_NULL(scheduler_get_next_process(sched));
+  TEST_ASSERT_EQUAL_INT(2, scheduler_get_next_process(sched, 0)->id);
+  TEST_ASSERT_EQUAL_INT(1, scheduler_get_next_process(sched, 0)->id);
+  TEST_ASSERT_EQUAL_INT(3, scheduler_get_next_process(sched, 0)->id);
+  TEST_ASSERT_NULL(scheduler_get_next_process(sched, 0));
 }
 
 void test_tie_breaker_arrival_time(void) {
@@ -54,8 +54,8 @@ void test_tie_breaker_arrival_time(void) {
   scheduler_enqueue_process(sched, &p2);
 
   // Ordem esperada: p2 (chegou em t=2), depois p1 (chegou em t=5)
-  TEST_ASSERT_EQUAL_INT(2, scheduler_get_next_process(sched)->id);
-  TEST_ASSERT_EQUAL_INT(1, scheduler_get_next_process(sched)->id);
+  TEST_ASSERT_EQUAL_INT(2, scheduler_get_next_process(sched, 0)->id);
+  TEST_ASSERT_EQUAL_INT(1, scheduler_get_next_process(sched, 0)->id);
 }
 
 void test_tie_breaker_id(void) {
@@ -72,8 +72,8 @@ void test_tie_breaker_id(void) {
   scheduler_enqueue_process(sched, &p1);
   scheduler_enqueue_process(sched, &p2);
 
-  TEST_ASSERT_EQUAL_INT(2, scheduler_get_next_process(sched)->id);
-  TEST_ASSERT_EQUAL_INT(5, scheduler_get_next_process(sched)->id);
+  TEST_ASSERT_EQUAL_INT(2, scheduler_get_next_process(sched, 0)->id);
+  TEST_ASSERT_EQUAL_INT(5, scheduler_get_next_process(sched, 0)->id);
 }
 
 int main(void) {

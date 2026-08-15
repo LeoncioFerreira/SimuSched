@@ -14,8 +14,9 @@ bool mock_enqueue(Scheduler *self, Process *p) {
   return true;
 }
 
-Process *mock_get_next(Scheduler *self) {
+Process *mock_get_next(Scheduler *self, int current_time) {
   (void)self;
+  (void)current_time;
   if (mock_head == mock_tail)
     return NULL;
   return mock_queue[mock_head++];

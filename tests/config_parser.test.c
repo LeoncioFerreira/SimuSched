@@ -30,7 +30,8 @@ static const char *valid_config(void) {
          "min_cpu_bursts=1\n"
          "max_cpu_bursts=3\n"
          "quantum=2\n"
-         "context_switch_cost=1\n";
+         "context_switch_cost=1\n"
+         "rescue_interval=10\n";
 }
 
 static void assert_config_fails(const char *content) {
@@ -67,6 +68,22 @@ void test_parses_valid_scenario(void) {
   TEST_ASSERT_EQUAL_INT(3, scenario.config.max_cpu_bursts);
   TEST_ASSERT_EQUAL_INT(2, scenario.quantum);
   TEST_ASSERT_EQUAL_INT(1, scenario.config.context_switch_cost);
+  TEST_ASSERT_EQUAL_INT(10, scenario.config.rescue_interval);
+}
+
+void test_rejects_non_positive_rescue_interval(void) {
+  char config[1024];
+  snprintf(config, sizeof(config), "%s", valid_config());
+  char *interval = strstr(config, "rescue_interval=10");
+  TEST_ASSERT_NOT_NULL(interval);
+  strcpy(interval, "rescue_interval=0\n");
+  assert_config_fails(config);
+
+  snprintf(config, sizeof(config), "%s", valid_config());
+  interval = strstr(config, "rescue_interval=10");
+  TEST_ASSERT_NOT_NULL(interval);
+  strcpy(interval, "rescue_interval=-1\n");
+  assert_config_fails(config);
 }
 
 void test_rejects_missing_file(void) {
@@ -95,6 +112,7 @@ void test_rejects_missing_and_malformed_keys(void) {
 int main(void) {
   UNITY_BEGIN();
   RUN_TEST(test_parses_valid_scenario);
+  RUN_TEST(test_rejects_non_positive_rescue_interval);
   RUN_TEST(test_rejects_missing_file);
   RUN_TEST(test_rejects_unknown_and_duplicate_keys);
   RUN_TEST(test_rejects_missing_and_malformed_keys);

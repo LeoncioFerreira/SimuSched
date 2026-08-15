@@ -9,7 +9,9 @@ static bool fcfs_enqueue_process(struct Scheduler *self, Process *p) {
   return circular_queue_enqueue(queue, p);
 }
 
-static Process *fcfs_get_next_process(struct Scheduler *self) {
+static Process *fcfs_get_next_process(struct Scheduler *self,
+                                      int current_time) {
+  (void)current_time;
   CircularQueue *queue = (CircularQueue *)self->state;
   return circular_queue_dequeue(queue);
 }
