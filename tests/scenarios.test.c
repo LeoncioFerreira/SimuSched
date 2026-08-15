@@ -111,10 +111,86 @@ void test_unbalanced_stats(void) {
   free_workload(workload, scenario.config.total_processes);
 }
 
+void test_balanced_stats(void) {
+  Scenario scenario;
+  char error[256];
+  ConfigParseResult res = config_parse_file("configs/balanced.conf", &scenario,
+                                            error, sizeof(error));
+  TEST_ASSERT_EQUAL(CONFIG_PARSE_OK, res);
+  TEST_ASSERT_EQUAL(1000, scenario.config.total_processes);
+
+  Process **workload = generate_workload(&scenario.config, 555);
+  TEST_ASSERT_NOT_NULL(workload);
+
+  double avg_cpu, avg_io, avg_bursts, high_prio;
+  calculate_stats(workload, scenario.config.total_processes, &avg_cpu, &avg_io,
+                  &avg_bursts, &high_prio);
+
+  // CPU and IO have intermediate values (5-50)
+  TEST_ASSERT_TRUE(avg_cpu > 15.0 && avg_cpu < 40.0);
+  TEST_ASSERT_TRUE(avg_io > 15.0 && avg_io < 40.0);
+
+  // High priority ratio should be around 50%
+  TEST_ASSERT_TRUE(high_prio >= 0.40 && high_prio <= 0.60);
+
+  free_workload(workload, scenario.config.total_processes);
+}
+
+void test_ratio_limits(void) {
+  ScenarioConfig config = {
+      .total_processes = 100,
+      .min_arrival = 0,
+      .max_arrival = 1000,
+      .min_priority = 0,
+      .max_priority = 1,
+      .high_priority_ratio = 0.0,
+      .min_cpu_burst_duration = 10,
+      .max_cpu_burst_duration = 20,
+      .min_io_burst_duration = 10,
+      .max_io_burst_duration = 20,
+      .min_cpu_bursts = 2,
+      .max_cpu_bursts = 5,
+      .context_switch_cost = 1
+  };
+
+  Process **workload = generate_workload(&config, 111);
+  TEST_ASSERT_NOT_NULL(workload);
+
+  double avg_cpu, avg_io, avg_bursts, high_prio;
+  calculate_stats(workload, config.total_processes, &avg_cpu, &avg_io,
+                  &avg_bursts, &high_prio);
+  TEST_ASSERT_TRUE(high_prio == 0.0);
+  free_workload(workload, config.total_processes);
+
+  config.high_priority_ratio = 1.0;
+  workload = generate_workload(&config, 222);
+  TEST_ASSERT_NOT_NULL(workload);
+  calculate_stats(workload, config.total_processes, &avg_cpu, &avg_io,
+                  &avg_bursts, &high_prio);
+  TEST_ASSERT_TRUE(high_prio == 1.0);
+  free_workload(workload, config.total_processes);
+}
+
+void test_nan_rejection(void) {
+  FILE *f = fopen("configs/test_nan.conf", "w");
+  fprintf(f, "scenario=test\ntotal_processes=10\nmin_arrival=0\nmax_arrival=1\nmin_priority=0\nmax_priority=1\nhigh_priority_ratio=NaN\nmin_cpu_burst_duration=1\nmax_cpu_burst_duration=1\nmin_io_burst_duration=1\nmax_io_burst_duration=1\nmin_cpu_bursts=1\nmax_cpu_bursts=1\nquantum=1\ncontext_switch_cost=1\n");
+  fclose(f);
+
+  Scenario scenario;
+  char error[256];
+  ConfigParseResult res = config_parse_file("configs/test_nan.conf", &scenario,
+                                            error, sizeof(error));
+  TEST_ASSERT_EQUAL(CONFIG_PARSE_ERROR, res);
+  remove("configs/test_nan.conf");
+}
+
 int main(void) {
   UNITY_BEGIN();
   RUN_TEST(test_io_bound_stats);
   RUN_TEST(test_cpu_bound_stats);
   RUN_TEST(test_unbalanced_stats);
+  RUN_TEST(test_balanced_stats);
+  RUN_TEST(test_ratio_limits);
+  RUN_TEST(test_nan_rejection);
   return UNITY_END();
 }

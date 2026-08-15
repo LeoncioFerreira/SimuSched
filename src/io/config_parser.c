@@ -2,6 +2,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -62,8 +63,8 @@ static int parse_double(const char *text, double *value) {
   double parsed;
   errno = 0;
   parsed = strtod(text, &end);
-  if (errno == ERANGE || end == text || *end != '\0' || parsed < 0.0 ||
-      parsed > 1.0)
+  if (errno == ERANGE || end == text || *end != '\0' || !isfinite(parsed) ||
+      parsed < 0.0 || parsed > 1.0)
     return 0;
   *value = parsed;
   return 1;

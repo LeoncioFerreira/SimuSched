@@ -8,7 +8,7 @@ Para garantir a justiça e a reprodutibilidade na comparação entre os algoritm
 
 *   **Modelo Estatístico:** Distribuição Uniforme Discreta.
 *   **Implementação:** A função `rand_range` no gerador (`workload.c`/`generator.c`) utiliza um gerador congruencial linear (LCG) acoplado a uma semente determinística (*seed*) para sortear um valor inteiro entre os limites definidos.
-*   **Limites Padronizados:** Em todos os quatro cenários exigidos, os processos são distribuídos uniformemente ao longo do tempo com os parâmetros `min_arrival = 0` e `max_arrival = 5000`. 
+*   **Limites Padronizados:** Em todos os quatro cenários exigidos, os processos são distribuídos uniformemente ao longo do tempo com os parâmetros `min_arrival = 0` e `max_arrival = 5000`.
 
 **Motivo:** Isso garante que a pressão de novos processos (a taxa de nascimento) na fila de "Prontos" (Ready Queue) seja idêntica e consistente. Se mudássemos a distribuição de chegada em um cenário específico, os resultados seriam enviesados e não saberíamos se um algoritmo se saiu melhor por causa de seu código ou porque os processos chegaram de forma mais amigável.
 
