@@ -159,7 +159,7 @@ make stats
 - `context_switches.csv`;
 - `jain_slowdown_percent.csv`.
 
-Cada tabela informa média, desvio padrão amostral, tamanho da amostra e IC95% para cada cenário e algoritmo. O IC95% bilateral usa a distribuição t de Student: `mean ± t(0.975, n - 1) × s / sqrt(n)`. Jain é apresentado em pontos percentuais, após conversão da escala original `[0, 1]` para `[0, 100]`. A decisão metodológica completa está em [`docs/design/statistical_consolidation.md`](docs/design/statistical_consolidation.md).
+Cada tabela informa média, desvio padrão amostral, tamanho da amostra e IC95% para cada cenário e algoritmo. O IC95% bilateral usa a distribuição t de Student: `mean ± t(0.975, n - 1) × s / sqrt(n)`. Jain é apresentado em pontos percentuais, após conversão da escala original `[0, 1]` para `[0, 100]`.
 
 Os testes estatísticos, inclusive comparações com valores calculados manualmente, podem ser executados isoladamente com:
 
