@@ -1,4 +1,5 @@
 CC = gcc
+PYTHON ?= python3
 CFLAGS = -Wall -Wextra -pthread -g -DUNITY_INCLUDE_DOUBLE -Iinclude -Itests/vendor -Isrc
 LDFLAGS = -pthread
 
@@ -54,11 +55,20 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Regra para compilar e rodar todos os testes automaticamente
-test: $(TEST_BINS)
+test: test-stats $(TEST_BINS)
 	@set -e; for test in $(TEST_BINS); do \
 		echo "Executando $$test..."; \
 		./$$test; \
 	done
+
+test-stats:
+	$(PYTHON) -m unittest discover -s tests -p 'test_consolidate_*.py' -v
+
+stats:
+	$(PYTHON) scripts/consolidate_statistics.py \
+		--input data/raw/simulations.csv \
+		--seeds configs/seeds.txt \
+		--output-dir data/processed
 
 run-all: $(TARGET)
 	@set -eu; \
@@ -121,4 +131,4 @@ format:
 clean:
 	rm -rf $(OBJ_DIR) $(BIN_DIR)
 
-.PHONY: all test lint format clean run run-all
+.PHONY: all test test-stats stats lint format clean run run-all

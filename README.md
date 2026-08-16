@@ -104,7 +104,7 @@ O projeto usa o framework [Unity](https://github.com/ThrowTheSwitch/Unity), vers
 make test
 ```
 
-Os alvos disponíveis por enquanto são `make all`, `make test`, `make lint`, `make format` e `make clean`.
+Os alvos disponíveis incluem `make all`, `make test`, `make test-stats`, `make stats`, `make lint`, `make format` e `make clean`.
 
 ### Compilação e execução
 
@@ -142,7 +142,30 @@ Os arquivos em `configs/` usam o formato `chave=valor`. O cenário inicial
 - `quantum`;
 - `context_switch_cost`.
 
-As rajadas de CPU e E/S e as prioridades são parametrizadas separadamente. O CSV gerado contém as colunas `algorithm`, `seed`, `scenario`, `total_processes` e `total_simulated_time`.
+As rajadas de CPU e E/S e as prioridades são parametrizadas separadamente. O CSV da campanha contém metadados da execução e as métricas `average_turnaround`, `context_switches` e `jain_slowdown`.
+
+### Consolidação estatística
+
+Depois de gerar as 1.600 execuções, regenere as tabelas consolidadas com:
+
+```bash
+make run-all
+make stats
+```
+
+`make stats` valida o cabeçalho e todas as combinações dos quatro cenários, quatro algoritmos e 100 seeds antes de escrever em `data/processed/`:
+
+- `average_turnaround.csv`;
+- `context_switches.csv`;
+- `jain_slowdown_percent.csv`.
+
+Cada tabela informa média, desvio padrão amostral, tamanho da amostra e IC95% para cada cenário e algoritmo. O IC95% bilateral usa a distribuição t de Student: `mean ± t(0.975, n - 1) × s / sqrt(n)`. Jain é apresentado em pontos percentuais, após conversão da escala original `[0, 1]` para `[0, 100]`.
+
+Os testes estatísticos, inclusive comparações com valores calculados manualmente, podem ser executados isoladamente com:
+
+```bash
+make test-stats
+```
 
 ## ⚙️ Pipeline de Integração Contínua (CI)
 
