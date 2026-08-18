@@ -92,7 +92,7 @@ O fluxo reproduzível adotado pelo projeto é:
 5. Consolidar médias e intervalos de confiança em `data/processed/`.
 6. Gerar gráficos em `results/figures/` para o artigo e os slides.
 
-Os comandos atuais de compilação, testes e execução estão documentados abaixo. As etapas de consolidação estatística e geração de gráficos serão adicionadas com os módulos correspondentes.
+Os comandos de compilação, testes, execução, consolidação estatística e geração de gráficos estão documentados detalhadamente nas seções abaixo.
 
 ## 🧪 Qualidade e reprodutibilidade
 
@@ -166,6 +166,17 @@ Os testes estatísticos, inclusive comparações com valores calculados manualme
 ```bash
 make test-stats
 ```
+
+### Geração de Gráficos
+
+Com as tabelas consolidadas prontas, as imagens utilizadas no artigo e nos slides podem ser (re)geradas com o comando:
+
+```bash
+source venv/bin/activate
+make figures
+```
+
+Este comando lê os arquivos de `data/processed/` e gera os gráficos de barras comparativos na pasta `results/figures/`, com os algoritmos agrupados por cenário e aplicando os Intervalos de Confiança (IC 95%) em cada métrica. Para rodar este comando, certifique-se de ativar o ambiente virtual (venv) contendo as dependências de plotagem.
 
 ## ⚙️ Pipeline de Integração Contínua (CI)
 

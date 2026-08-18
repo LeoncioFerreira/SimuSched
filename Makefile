@@ -131,4 +131,7 @@ format:
 clean:
 	rm -rf $(OBJ_DIR) $(BIN_DIR)
 
-.PHONY: all test test-stats stats lint format clean run run-all
+figures:
+	$(PYTHON) scripts/generate_figures.py
+
+.PHONY: all test test-stats stats lint format clean run run-all figures
