@@ -32,12 +32,12 @@ Os materiais finais do trabalho ficarão separados do código:
 
 | Integrante | Responsabilidade | GitHub |
 | --- | --- | --- |
-| **André Wesley** | Artigo Científico, Metodologia e Revisão de Testes | [@AndreWesley](https://github.com/AndreWesley) |
-| **Leôncio Ferreira** | Algoritmo TEJ, Escalonadores e Arquitetura em C | [@LeoncioFerreira](https://github.com/LeoncioFerreira) |
-| **Paulo Gabriel** | Scripts Python de Estatística, Gráficos e Integração | [@LandimPG](https://github.com/LandimPG) |
-| **Salomão Rodrigues** | Apresentação, Slides e Pipeline de Reprodutibilidade | [@SalomaoRodrigues](https://github.com/SalomaoRodrigues) |
+| **André Wesley** | CLI, Implementação das Métricas (Jain/Turnaround) e Consolidação Estatística (Python) | [@AndreWesley](https://github.com/AndreWesley) |
+| **Leôncio Ferreira** | Núcleo do Simulador, Automação (`make run-all`), Round Robin e Redação do Artigo | [@LeoncioFerreira](https://github.com/LeoncioFerreira) |
+| **Paulo Gabriel** | Escalonadores Básicos (FCFS/Prioridade), Cenários/Seeds, Geração de Gráficos e Slides | [@LandimPG](https://github.com/LandimPG) |
+| **Salomão Rodrigues** | Gerador Determinístico, Modelagem de E/S Paralela e Custo de Troca de Contexto | [@SalomaoRodrigues](https://github.com/SalomaoRodrigues) |
 
-As responsabilidades estão alinhadas ao histórico de commits do repositório, garantindo a rastreabilidade da participação da equipe conforme exigido na avaliação.
+*Nota: O algoritmo próprio (TEJ) foi projetado e desenvolvido em conjunto por toda a equipe.* As responsabilidades individuais listadas acima refletem a divisão de tarefas do Kanban oficial do projeto.
 
 ## 🏗️ Estrutura do Projeto
 
