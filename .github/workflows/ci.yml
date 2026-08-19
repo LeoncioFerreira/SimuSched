@@ -28,7 +28,7 @@ jobs:
 
       - name: Build and Run Tests
         run: |
-          required_paths=(README.md LICENSE configs data/raw data/processed docs/design docs/report docs/slides include results/figures scripts src tests)
+          required_paths=(README.md LICENSE configs docs/design docs/report docs/slides include scripts src tests)
           for path in "${required_paths[@]}"; do
             test -e "$path"
           done

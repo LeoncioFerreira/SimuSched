@@ -1,176 +1,154 @@
 # SimuSched
 
-[![Language: C](https://img.shields.io/badge/Language-C-blue.svg)](https://en.wikipedia.org/wiki/C_(programming_language))
+[![Linguagem: C](https://img.shields.io/badge/Linguagem-C-00599C.svg?logo=c)](https://en.wikipedia.org/wiki/C_(programming_language))
 [![CI](https://github.com/LeoncioFerreira/SimuSched/actions/workflows/ci.yml/badge.svg)](https://github.com/LeoncioFerreira/SimuSched/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Licença: MIT](https://img.shields.io/badge/Licen%C3%A7a-MIT-yellow.svg)](LICENSE)
 
-SimuSched será um simulador de escalonamento de processos para a disciplina de Sistemas Operacionais. O projeto comparará algoritmos clássicos com um algoritmo proposto pela equipe, usando cargas de trabalho determinísticas geradas por seed e métricas quantitativas de desempenho e justiça.
+## 1. Nossa Equipe
 
-> Status atual: **Projeto Finalizado**. Núcleo de simulação, gerador determinístico, pipeline automatizado e todos os escalonadores (FCFS, Prioridade Não Preemptiva, Round-Robin e o algoritmo próprio **TEJ**) implementados.
+| Integrante | GitHub |
+| --- | --- |
+| André Wesley Barbosa Rodrigues Filho | [@awesleyy](https://github.com/awesleyy) |
+| Leôncio Ferreira Flores Neto | [@LeoncioFerreira](https://github.com/LeoncioFerreira) |
+| Paulo Gabriel Leite Landim | [@LandimPG](https://github.com/LandimPG) |
+| Salomão Rodrigues Silva | [@salomaosilvaa](https://github.com/salomaosilvaa) |
 
-## 📄 Objetivo acadêmico
+## 2. O Projeto
 
-O simulador deverá modelar processos, filas de prontos, execuções de CPU, bloqueios de E/S, preempção e custo de troca de contexto. Os experimentos deverão comparar os algoritmos nos cenários exigidos pelo enunciado, usando as mesmas seeds e a mesma configuração para todos eles.
+O SimuSched é um simulador determinístico de escalonamento de processos, desenvolvido em C para a disciplina de Sistemas Operacionais da UFCA. O projeto compara FCFS, Prioridade não preemptiva e Round-Robin com o algoritmo próprio **Triagem com Espera Justa (TEJ)**.
 
-As métricas principais previstas são:
+O problema central é a inanição (*starvation*): processos de baixa prioridade podem esperar indefinidamente quando tarefas de alta prioridade continuam chegando. O TEJ combina prioridade estática com um prazo determinístico de resgate. Quando o prazo é atingido, o processo recebe precedência na próxima decisão, sem interromper a rajada que já está usando a CPU.
 
-- Turnaround médio;
-- Quantidade de trocas de contexto;
-- Índice de Jain aplicado ao slowdown;
-- Média e intervalo de confiança de 95% para cada cenário e algoritmo.
+## 3. Demonstração e Resultados
 
-## 📄 Artefatos
+Os resultados usam a mesma carga para todos os algoritmos em quatro cenários obrigatórios: equilibrado, CPU-bound, I/O-bound e prioridades desbalanceadas. A campanha possui 1.600 execuções — 4 algoritmos × 4 cenários × 100 seeds — com 1.000 processos por execução e IC95% calculado pela distribuição t de Student.
 
-Os materiais finais do trabalho ficarão separados do código:
+As métricas avaliadas são:
 
-- Artigo científico, bibliografia, tabelas e figuras: [`docs/report/`](docs/report/)
-- Decisões de arquitetura e modelo da simulação: [`docs/design/`](docs/design/)
-- Slides da apresentação: [`docs/slides/`](docs/slides/)
-- Dados e gráficos consolidados dos experimentos: [`data/`](data/) e [`results/figures/`](results/figures/)
+- **Turnaround médio:** tempo entre chegada e conclusão;
+- **Trocas de contexto:** mudanças de processo na CPU;
+- **Índice de Jain do slowdown:** equilíbrio entre os atrasos relativos.
 
-## 👨‍💻 Equipe
+Os materiais para consulta são o [artigo científico](docs/report/artigo_so.pdf), os [slides da apresentação](docs/slides/slide_sistemas_operacionais_TEJ.pdf) e as [figuras do relatório](docs/report/figuras/).
 
-| Integrante | Responsabilidade | GitHub |
-| --- | --- | --- |
-| **André Wesley** | CLI, Implementação das Métricas (Jain/Turnaround) e Consolidação Estatística (Python) | [@AndreWesley](https://github.com/AndreWesley) |
-| **Leôncio Ferreira** | Núcleo do Simulador, Automação (`make run-all`), Round Robin e Redação do Artigo | [@LeoncioFerreira](https://github.com/LeoncioFerreira) |
-| **Paulo Gabriel** | Escalonadores Básicos (FCFS/Prioridade), Cenários/Seeds, Geração de Gráficos e Slides | [@LandimPG](https://github.com/LandimPG) |
-| **Salomão Rodrigues** | Gerador Determinístico, Modelagem de E/S Paralela e Custo de Troca de Contexto | [@SalomaoRodrigues](https://github.com/SalomaoRodrigues) |
+## 4. Como Rodar Localmente
 
-*Nota: O algoritmo próprio (TEJ) foi projetado e desenvolvido em conjunto por toda a equipe.* As responsabilidades individuais listadas acima refletem a divisão de tarefas do Kanban oficial do projeto.
+### Pré-requisitos
 
-## 🏗️ Estrutura do Projeto
+- GCC ou compilador compatível com C;
+- GNU Make;
+- Python 3;
+- `cppcheck` e `clang-format` para os alvos de qualidade.
 
-```text
-.
-├── README.md               # Visão geral, regras e guia de reprodução
-├── LICENSE                 # Licença do projeto
-├── .gitignore              # Artefatos de compilação e dados gerados
-├── configs/                # Cenários, parâmetros e listas de seeds
-├── data/
-│   ├── raw/                # Resultados CSV de execuções individuais (não versionados)
-│   └── processed/          # Métricas agregadas e IC95% (não versionados)
-├── docs/
-│   ├── design/             # Decisões de arquitetura e de experimento
-│   ├── report/             # Artigo científico, referências e figuras
-│   └── slides/             # Apresentação final
-├── include/                # Cabeçalhos públicos do simulador em C
-├── results/
-│   └── figures/            # Gráficos gerados para relatório e slides
-├── scripts/                # Automação de experimentos, estatística e gráficos
-├── src/                    # Código-fonte C do simulador
-│   ├── core/               # Tempo discreto e estado da simulação
-│   ├── process/            # Processos, rajadas e estados
-│   ├── scheduler/          # Políticas de escalonamento
-│   ├── workload/           # Cargas reproduzíveis por seed
-│   ├── metrics/            # Métricas por processo e por execução
-│   └── io/                 # Configurações e exportação de resultados
-└── tests/                  # Testes unitários e de reprodutibilidade
-```
-
-## 📜 Regras de Desenvolvimento
-
-### Idioma e documentação
-
-- Código, nomes de arquivos, variáveis e funções serão escritos em inglês.
-- README, documentação de design e relatório serão escritos em português.
-- Cada decisão que afete comparabilidade ou reprodutibilidade deverá ser registrada em `docs/design/`.
-- Toda execução experimental deverá informar cenário, seed, algoritmo e parâmetros utilizados.
-
-### Git e fluxo de trabalho
-
-- Cada alteração deve ser feita em uma branch descritiva e revisada antes de integrar à `main`.
-- Commits devem descrever uma mudança única e indicar claramente o trabalho realizado.
-- Arquivos compilados, logs, CSVs intermediários e gráficos temporários não devem ser versionados.
-- Resultados finais usados no artigo serão identificados e adicionados conscientemente à documentação.
-
-## 🚀 Fluxo previsto de execução
-
-O fluxo reproduzível adotado pelo projeto é:
-
-1. Definir um cenário e suas seeds em `configs/`.
-2. Compilar o simulador C.
-3. Executar todos os algoritmos com a mesma carga para cada seed.
-4. Gravar os resultados individuais em `data/raw/`.
-5. Consolidar médias e intervalos de confiança em `data/processed/`.
-6. Gerar gráficos em `results/figures/` para o artigo e os slides.
-
-Os comandos de compilação, testes, execução, consolidação estatística e geração de gráficos estão documentados detalhadamente nas seções abaixo.
-
-## 🧪 Qualidade e reprodutibilidade
-
-A suíte de testes verifica a geração idêntica de cargas para a mesma seed, as transições de estado dos processos, as regras de cada escalonador, a CLI, os cenários e a exportação CSV. Os testes de métricas serão adicionados junto desse módulo.
-
-O projeto usa o framework [Unity](https://github.com/ThrowTheSwitch/Unity), versionado em `tests/vendor/`. Toda a suíte pode ser executada com:
-
-```bash
-make test
-```
-
-Os alvos disponíveis incluem `make all`, `make test`, `make test-stats`, `make stats`, `make lint`, `make format` e `make clean`.
-
-### Compilação e execução
-
-Compile o simulador e execute toda a suíte de testes com:
+### Compilar e testar
 
 ```bash
 make all
 make test
 ```
 
-O binário aceita algoritmo, seed, arquivo de cenário e arquivo CSV de saída:
-
-```text
-./bin/simulador --algorithm <fcfs|priority> --seed <n> --config <arquivo> --output <csv>
-```
-
-Exemplos usando a mesma carga para os dois algoritmos:
+### Executar uma simulação
 
 ```bash
-./bin/simulador --algorithm fcfs --seed 42 --config configs/small.conf --output data/raw/fcfs-small-42.csv
-./bin/simulador --algorithm priority --seed 42 --config configs/small.conf --output data/raw/priority-small-42.csv
+./bin/simulador \
+  --algorithm tej \
+  --seed 42 \
+  --config configs/small.conf \
+  --output data/raw/tej-small-42.csv
 ```
 
-Os arquivos em `configs/` usam o formato `chave=valor`. O cenário inicial
-[`configs/small.conf`](configs/small.conf) demonstra todos os campos obrigatórios:
+Os algoritmos aceitos são `fcfs`, `priority`, `round-robin` e `tej`. Para uma comparação justa, mantenha o mesmo cenário e a mesma seed e altere apenas `--algorithm`.
 
-- `scenario`;
-- `total_processes`;
-- `min_arrival` e `max_arrival`;
-- `min_priority` e `max_priority`;
-- `high_priority_ratio`;
-- `min_cpu_burst_duration` e `max_cpu_burst_duration`;
-- `min_io_burst_duration` e `max_io_burst_duration`;
-- `min_cpu_bursts` e `max_cpu_bursts`;
-- `quantum`;
-- `context_switch_cost`.
-
-As rajadas de CPU e E/S e as prioridades são parametrizadas separadamente. O CSV da campanha contém metadados da execução e as métricas `average_turnaround`, `context_switches` e `jain_slowdown`.
-
-### Execução do Pipeline Completo (Simulação, Estatística e Gráficos)
-
-O repositório conta com um pipeline totalmente automatizado. Para rodar as 1.600 simulações C em lote (`run-all`), consolidar as estatísticas (`stats`) e plotar as imagens finais (`figures`) de uma só vez, ative o ambiente virtual e execute o comando principal:
+### Executar e consolidar a campanha
 
 ```bash
-source venv/bin/activate
+make run-all
+make stats
 make figures
 ```
 
-O alvo `figures` encadeia automaticamente as dependências, garantindo que os dados brutos e processados sejam recriados sempre que necessário antes de gerar os gráficos na pasta `results/figures/` e `docs/report/figuras/`.
+Os resultados brutos são gravados em `data/raw/simulations.csv`; as tabelas consolidadas ficam em `data/processed/` e as figuras em `results/figures/` e `docs/report/figuras/`.
 
-#### Execução Isolada de Etapas
-Caso deseje executar ou testar as etapas do pipeline de forma isolada:
+### Gráficos principais
 
-- **Simulação Bruta (`make run-all`):** Roda a campanha completa (100 seeds x 4 cenários x 4 algoritmos) e escreve o CSV bruto em `data/raw/simulations.csv`.
-- **Consolidação (`make stats`):** Valida os dados brutos e escreve as médias e o IC95% bilateral (Student) em `data/processed/` (Turnaround, Trocas de Contexto e Índice de Jain).
-- **Testes Estatísticos (`make test-stats`):** Roda a suíte de testes em Python isoladamente para garantir a precisão matemática da consolidação.
+![Turnaround médio por cenário](docs/report/figuras/turnaround_medio.png)
 
-## ⚙️ Pipeline de Integração Contínua (CI)
+![Trocas de contexto por cenário](docs/report/figuras/trocas_contexto.png)
 
-O GitHub Actions em [`.github/workflows/ci.yml`](.github/workflows/ci.yml) executa em pushes e pull requests para `main` e `develop`.
+![Índice de Jain do slowdown por cenário](docs/report/figuras/jain_slowdown.png)
 
-O pipeline valida a estrutura obrigatória, instala `cppcheck` e `clang-format`, verifica a formatação, executa o linter e roda `make all` e `make test`. Assim, toda alteração precisa manter build e testes automatizados aprovados.
+Outros alvos disponíveis são `make test-stats`, `make lint`, `make format` e `make clean`.
 
-## 📅 Entrega
+## 5. Como o Simulador Funciona
 
-Conforme o enunciado da disciplina, a entrega está prevista para **19 de agosto de 2026**. O repositório deverá conter o código, instruções de execução, configurações, resultados consolidados e os materiais de apresentação.
+A simulação usa tempo discreto em ticks. Cada processo possui identificador, chegada, prioridade, estado e uma sequência de rajadas `CPU → E/S → CPU`. Os estados são `NEW`, `READY`, `RUNNING`, `BLOCKED` e `FINISHED`.
+
+- Apenas um processo executa por vez;
+- operações de E/S são paralelas, sem fila única de dispositivo;
+- ao concluir E/S, o processo retorna ao final da fila `READY`;
+- o custo de troca deixa a CPU indisponível durante os ticks configurados;
+- a saída do estado ocioso não conta como troca;
+- prioridades menores representam maior prioridade (`0` é a máxima).
+
+### Algoritmos
+
+- **FCFS:** seleciona pela ordem de entrada na fila;
+- **Prioridade:** seleciona a menor prioridade numérica, sem preempção;
+- **Round-Robin:** usa quantum configurável de 10 ticks e preempção ao fim do quantum;
+- **TEJ:** usa prioridade normalmente e dá precedência a processos cujo prazo de resgate foi atingido.
+
+O prazo do TEJ é calculado por:
+
+```text
+rescue_deadline = ready_queue_arrival
+                  + (priority - minimum_priority + 1) * rescue_interval
+```
+
+Com `rescue_interval = 10`, o TEJ seleciona primeiro os processos resgatados. Empates usam prazo, entrada mais antiga na fila e menor identificador. A política é não preemptiva.
+
+## 6. Cenários e Reprodutibilidade
+
+Os cenários estão em [`configs/`](configs/):
+
+- `balanced.conf`: mistura de rajadas de CPU e E/S;
+- `cpu_bound.conf`: CPU entre 50 e 200 ticks e pouca E/S;
+- `io_bound.conf`: CPU entre 1 e 5 ticks, E/S entre 30 e 100 ticks e muitas requisições;
+- `unbalanced_priorities.conf`: 85% dos processos com prioridade 0 e 15% com prioridade 10.
+
+As chegadas são sorteadas uniformemente no intervalo `[0, 5000]` a partir da seed. A mesma seed e o mesmo cenário produzem a mesma carga em qualquer algoritmo. As 100 seeds estão em [`configs/seeds.txt`](configs/seeds.txt).
+
+## 7. Issues e Entregas
+
+O TEJ foi projetado e desenvolvido em conjunto pela equipe. As demais responsabilidades foram conferidas nas issues reais e no histórico de commits.
+
+| Integrante | Issues associadas | Entregas e responsabilidades |
+| --- | --- | --- |
+| André Wesley Barbosa Rodrigues Filho | [#4](https://github.com/LeoncioFerreira/SimuSched/issues/4), [#12](https://github.com/LeoncioFerreira/SimuSched/issues/12), [#20](https://github.com/LeoncioFerreira/SimuSched/issues/20) | CLI, CSV, métricas, consolidação estatística e testes de IC95% |
+| Leôncio Ferreira Flores Neto | [#1](https://github.com/LeoncioFerreira/SimuSched/issues/1), [#9](https://github.com/LeoncioFerreira/SimuSched/issues/9), [#18](https://github.com/LeoncioFerreira/SimuSched/issues/18), [#19](https://github.com/LeoncioFerreira/SimuSched/issues/19), [#22](https://github.com/LeoncioFerreira/SimuSched/issues/22) | Núcleo, Round-Robin, TEJ, executor da campanha e coordenação do artigo |
+| Paulo Gabriel Leite Landim | [#2](https://github.com/LeoncioFerreira/SimuSched/issues/2), [#11](https://github.com/LeoncioFerreira/SimuSched/issues/11), [#21](https://github.com/LeoncioFerreira/SimuSched/issues/21), [#23](https://github.com/LeoncioFerreira/SimuSched/issues/23) | FCFS, prioridade, cenários, gráficos comparativos e slides |
+| Salomão Rodrigues Silva | [#3](https://github.com/LeoncioFerreira/SimuSched/issues/3), [#10](https://github.com/LeoncioFerreira/SimuSched/issues/10), [#23](https://github.com/LeoncioFerreira/SimuSched/issues/23) | Gerador determinístico, E/S, custo de troca, resultados da campanha e slides |
+
+## 8. Estrutura do Projeto
+
+```text
+.
+├── configs/                  # Cenários e seeds
+├── data/                     # Dados brutos e tabelas geradas localmente
+├── docs/                     # Artigo, slides e decisões de modelagem
+├── include/                  # Interfaces públicas em C
+├── results/figures/          # Gráficos gerados
+├── scripts/                  # Campanha, estatística e visualização
+├── src/                      # Código-fonte do simulador
+└── tests/                    # Testes C, Python e Unity
+```
+
+## 9. Documentação e Licença
+
+- [Artigo científico](docs/report/artigo_so.pdf);
+- [Slides](docs/slides/slide_sistemas_operacionais_TEJ.pdf);
+- [Figuras](docs/report/figuras/);
+- [Scripts](scripts/);
+- [Decisões de modelagem](docs/design/);
+- [Issue de integração](https://github.com/LeoncioFerreira/SimuSched/issues/27).
+
+O projeto é distribuído sob a [licença MIT](LICENSE).
