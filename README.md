@@ -6,7 +6,7 @@
 
 SimuSched será um simulador de escalonamento de processos para a disciplina de Sistemas Operacionais. O projeto comparará algoritmos clássicos com um algoritmo proposto pela equipe, usando cargas de trabalho determinísticas geradas por seed e métricas quantitativas de desempenho e justiça.
 
-> Status atual: núcleo de simulação, escalonadores FCFS e prioridade não preemptiva, gerador determinístico e interface de linha de comando implementados.
+> Status atual: **Projeto Finalizado**. Núcleo de simulação, gerador determinístico, pipeline automatizado e todos os escalonadores (FCFS, Prioridade Não Preemptiva, Round-Robin e o algoritmo próprio **TEJ**) implementados.
 
 ## 📄 Objetivo acadêmico
 
@@ -32,9 +32,12 @@ Os materiais finais do trabalho ficarão separados do código:
 
 | Integrante | Responsabilidade | GitHub |
 | --- | --- | --- |
-| A definir | A definir | A definir |
+| **André Wesley** | Artigo Científico, Metodologia e Revisão de Testes | [@AndreWesley](https://github.com/AndreWesley) |
+| **Leôncio Ferreira** | Algoritmo TEJ, Escalonadores e Arquitetura em C | [@LeoncioFerreira](https://github.com/LeoncioFerreira) |
+| **Paulo Gabriel** | Scripts Python de Estatística, Gráficos e Integração | [@LandimPG](https://github.com/LandimPG) |
+| **Salomão Rodrigues** | Apresentação, Slides e Pipeline de Reprodutibilidade | [@SalomaoRodrigues](https://github.com/SalomaoRodrigues) |
 
-As responsabilidades serão registradas e atualizadas antes da entrega, junto do histórico de commits no GitHub.
+As responsabilidades estão alinhadas ao histórico de commits do repositório, garantindo a rastreabilidade da participação da equipe conforme exigido na avaliação.
 
 ## 🏗️ Estrutura do Projeto
 
@@ -144,39 +147,23 @@ Os arquivos em `configs/` usam o formato `chave=valor`. O cenário inicial
 
 As rajadas de CPU e E/S e as prioridades são parametrizadas separadamente. O CSV da campanha contém metadados da execução e as métricas `average_turnaround`, `context_switches` e `jain_slowdown`.
 
-### Consolidação estatística
+### Execução do Pipeline Completo (Simulação, Estatística e Gráficos)
 
-Depois de gerar as 1.600 execuções, regenere as tabelas consolidadas com:
-
-```bash
-make run-all
-make stats
-```
-
-`make stats` valida o cabeçalho e todas as combinações dos quatro cenários, quatro algoritmos e 100 seeds antes de escrever em `data/processed/`:
-
-- `average_turnaround.csv`;
-- `context_switches.csv`;
-- `jain_slowdown_percent.csv`.
-
-Cada tabela informa média, desvio padrão amostral, tamanho da amostra e IC95% para cada cenário e algoritmo. O IC95% bilateral usa a distribuição t de Student: `mean ± t(0.975, n - 1) × s / sqrt(n)`. Jain é apresentado em pontos percentuais, após conversão da escala original `[0, 1]` para `[0, 100]`.
-
-Os testes estatísticos, inclusive comparações com valores calculados manualmente, podem ser executados isoladamente com:
-
-```bash
-make test-stats
-```
-
-### Geração de Gráficos
-
-Com as tabelas consolidadas prontas, as imagens utilizadas no artigo e nos slides podem ser (re)geradas com o comando:
+O repositório conta com um pipeline totalmente automatizado. Para rodar as 1.600 simulações C em lote (`run-all`), consolidar as estatísticas (`stats`) e plotar as imagens finais (`figures`) de uma só vez, ative o ambiente virtual e execute o comando principal:
 
 ```bash
 source venv/bin/activate
 make figures
 ```
 
-Este comando lê os arquivos de `data/processed/` e gera os gráficos de barras comparativos na pasta `results/figures/`, com os algoritmos agrupados por cenário e aplicando os Intervalos de Confiança (IC 95%) em cada métrica. Para rodar este comando, certifique-se de ativar o ambiente virtual (venv) contendo as dependências de plotagem.
+O alvo `figures` encadeia automaticamente as dependências, garantindo que os dados brutos e processados sejam recriados sempre que necessário antes de gerar os gráficos na pasta `results/figures/` e `docs/report/figuras/`.
+
+#### Execução Isolada de Etapas
+Caso deseje executar ou testar as etapas do pipeline de forma isolada:
+
+- **Simulação Bruta (`make run-all`):** Roda a campanha completa (100 seeds x 4 cenários x 4 algoritmos) e escreve o CSV bruto em `data/raw/simulations.csv`.
+- **Consolidação (`make stats`):** Valida os dados brutos e escreve as médias e o IC95% bilateral (Student) em `data/processed/` (Turnaround, Trocas de Contexto e Índice de Jain).
+- **Testes Estatísticos (`make test-stats`):** Roda a suíte de testes em Python isoladamente para garantir a precisão matemática da consolidação.
 
 ## ⚙️ Pipeline de Integração Contínua (CI)
 
