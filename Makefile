@@ -64,7 +64,7 @@ test: test-stats $(TEST_BINS)
 test-stats:
 	$(PYTHON) -m unittest discover -s tests -p 'test_consolidate_*.py' -v
 
-stats:
+stats: run-all
 	$(PYTHON) scripts/consolidate_statistics.py \
 		--input data/raw/simulations.csv \
 		--seeds configs/seeds.txt \
@@ -131,7 +131,7 @@ format:
 clean:
 	rm -rf $(OBJ_DIR) $(BIN_DIR)
 
-figures:
+figures: stats
 	$(PYTHON) scripts/generate_figures.py
 
 .PHONY: all test test-stats stats lint format clean run run-all figures
