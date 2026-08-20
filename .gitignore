@@ -63,6 +63,7 @@ build/
 __pycache__/
 *.py[cod]
 .venv/
+venv/
 
 # Generated experiment data (keep directory placeholders only)
 data/raw/*

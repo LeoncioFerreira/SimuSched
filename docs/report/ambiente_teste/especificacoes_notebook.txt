@@ -1,0 +1,76 @@
+
+Nome do host:                              NITROV15-SAL
+Nome do sistema operacional:               Microsoft Windows 11 Home Single Language
+Vers∆o do sistema operacional:             10.0.26200 N/A compilaá∆o 26200
+Fabricante do sistema operacional:         Microsoft Corporation
+Configuraá∆o do sistema operacional:       Estaá∆o de trabalho autìnoma
+Tipo de compilaá∆o do sistema operacional: Multiprocessor Free
+Propriet†rio registrado:                   Acer
+Organizaá∆o registrada:                    N/A
+Identificaá∆o do produto:                  00327-60000-00000-AA808
+Data da instalaá∆o original:               19/08/2025, 18:50:26
+Tempo de Inicializaá∆o do Sistema:         13/08/2026, 17:10:51
+Fabricante do sistema:                     Acer
+Modelo do sistema:                         Nitro ANV15-51
+Tipo de sistema:                           x64-based PC
+Processador(es):                           1 processador(es) instalado(s).
+                                           [01]: Intel64 Family 6 Model 186 Stepping 2 GenuineIntel ~2400 Mhz
+Vers∆o do BIOS:                            INSYDE Corp. V1.60, 08/04/2026
+Diret¢rio do Windows:                      C:\WINDOWS
+Diret¢rio do sistema:                      C:\WINDOWS\system32
+Dispositivo de inicializaá∆o:              \Device\HarddiskVolume1
+Localidade do sistema:                     pt-br;Portuguàs (Brasil)
+Localidade de entrada:                     pt-br;Portuguàs (Brasil)
+Fuso hor†rio:                              (UTC-03:00) Bras°lia
+Mem¢ria f°sica total:                      16.088 MB
+Mem¢ria f°sica dispon°vel:                 3.847 MB
+Mem¢ria Virtual: Tamanho M†ximo:           20.493 MB
+Mem¢ria Virtual: Dispon°vel:               4.166 MB
+Mem¢ria Virtual: Em Uso:                   16.327 MB
+Local(s) do Arquivo de P†gina:             C:\pagefile.sys
+Dom°nio:                                   WORKGROUP
+Servidor de Logon:                         \\NITROV15-SAL
+Hotfix(es):                                4 hotfix(es) instalado(s).
+                                           [01]: KB5120708
+                                           [02]: KB5054156
+                                           [03]: KB5121003
+                                           [04]: KB5123304
+Placa(s) de Rede:                          4 NIC(s) instalado(s).
+                                           [01]: Realtek PCIe GbE Family Controller
+                                                 Nome da conex∆o: Ethernet
+                                                 Status:          M°dia desconectada
+                                           [02]: MediaTek Wi-Fi 6 MT7921 Wireless LAN Card
+                                                 Nome da conex∆o: Wi-Fi
+                                                 DHCP ativado:    Sim
+                                                 Servidor DHCP:   10.1.4.1
+                                                 Endereáo(es) IP
+                                                 [01]: 10.1.4.114
+                                                 [02]: fe80::e58c:eea8:4c33:29bc
+                                           [03]: Bluetooth Device (Personal Area Network)
+                                                 Nome da conex∆o: Conex∆o de Rede Bluetooth
+                                                 Status:          M°dia desconectada
+                                           [04]: VirtualBox Host-Only Ethernet Adapter
+                                                 Nome da conex∆o: Ethernet 2
+                                                 DHCP ativado:    N∆o
+                                                 Endereáo(es) IP
+                                                 [01]: 192.168.56.1
+                                                 [02]: fe80::bd77:b124:67de:51ed
+Seguranáa baseada em virtualizaá∆o:        Status: Executando
+                                           Propriedades de Seguranáa Necess†rias:
+                                                 Suporte para Virtualizaá∆o de Base
+                                           Propriedades de seguranáa dispon°veis:
+                                                 Suporte para Virtualizaá∆o de Base
+                                                 Inicializaá∆o Segura
+                                                 Proteá∆o do DMA
+                                                 C¢digo UEFI Somente Leitura
+                                                 SMM Security Mitigations 1.0
+                                                 Modo de controle de execuá∆o com base
+                                                 Virtualizaá∆o do APIC
+                                           Services Configured:
+                                                 Integridade de C¢digo imposta por Hypervisor
+                                           Services Running:
+                                                 Integridade de C¢digo imposta por Hypervisor
+                                           App Control for Business policy: Imposto
+                                           App Control for Business user mode policy: Desativado
+                                           Recursos de SeguranáaˇHabilitados:
+Requisitos do Hyper-V:                     Hipervisor detectado. Recursos necess†rios para o Hyper-V n∆o ser∆o exibidos.
